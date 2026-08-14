@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import './Cassette.css';
+import './Datacorder.css';
 
-function Cassette({ onFileLoad }) {
+function Datacorder({ onFileLoad }) {
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -16,32 +16,32 @@ function Cassette({ onFileLoad }) {
   };
 
   return (
-    <div className="cassette-container">
-      <div className="cassette">
-        <div className="cassette-top">
-          <span className="cassette-icon">📼</span>
-          <span className="cassette-title">CASSETTE</span>
+    <div className="datacorder-wrapper">
+      <div className="datacorder">
+        <div className="datacorder-top">
+          <span className="datacorder-icon">📼</span>
+          <span className="datacorder-title">DATACORDER</span>
         </div>
 
-        <div className="cassette-body">
-          <div className="cassette-window">
-            <div className="cassette-tape">
+        <div className="datacorder-body">
+          <div className="datacorder-window">
+            <div className="datacorder-tape">
               <div className="tape-reel left"></div>
-              <div className="tape-reel right"></div>
               <div className="tape-band"></div>
+              <div className="tape-reel right"></div>
             </div>
           </div>
 
-          <div className="cassette-controls">
-            <button className="cassette-btn rec" title="Enregistrer">●</button>
-            <button className="cassette-btn stop" title="Stop">■</button>
-            <button className="cassette-btn play" title="Lecture">▶</button>
-            <button className="cassette-btn pause" title="Pause">⏸</button>
-            <button className="cassette-btn eject" title="Éjecter">⏏</button>
+          <div className="datacorder-controls">
+            <button className="datacorder-btn rec" title="Enregistrer">●</button>
+            <button className="datacorder-btn stop" title="Stop">■</button>
+            <button className="datacorder-btn play" title="Lecture">▶</button>
+            <button className="datacorder-btn pause" title="Pause">⏸</button>
+            <button className="datacorder-btn eject" title="Éjecter">⏏</button>
           </div>
         </div>
 
-        <div className="cassette-bottom">
+        <div className="datacorder-bottom">
           <input
             type="file"
             ref={fileInputRef}
@@ -49,14 +49,14 @@ function Cassette({ onFileLoad }) {
             accept=".tap,.cdt"
             style={{ display: 'none' }}
           />
-          <button className="cassette-load-btn" onClick={handleLoadClick}>
+          <button className="datacorder-load-btn" onClick={handleLoadClick}>
             📂 Charger un programme
           </button>
-          <span className="cassette-status">Prêt</span>
+          <span className="datacorder-status">Prêt</span>
         </div>
       </div>
     </div>
   );
 }
 
-export default Cassette;
+export default Datacorder;

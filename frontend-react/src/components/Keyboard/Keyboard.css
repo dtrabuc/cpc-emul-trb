@@ -1,19 +1,24 @@
-/* --- CONTENEUR --- */
-.keyboard-container {
+/* frontend-react/src/components/Keyboard/Keyboard.css */
+
+.keyboard-wrapper {
+  background: #181818;
+  border: 2px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.keyboard-main {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 #virtual-keyboard {
   flex: 1;
-  background-color: #1a1a2e;
-  border: 2px solid #2a2a4a;
-  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border-radius: 4px;
   min-width: 0;
 }
 
@@ -23,60 +28,64 @@
   height: 32px;
 }
 
-/* --- TOUCHES (BLANCHES PAR DÉFAUT) --- */
+/* --- Touche de base (blanche) --- */
 .key {
   background: #e8e8e8;
-  color: #000000;
+  color: #000;
   border: 1px solid #aaa;
   border-bottom: 3px solid #888;
-  border-radius: 3px;
+  border-radius: 4px;
   font-weight: bold;
+  font-size: 11px;
+  font-family: "Segoe UI", "Courier New", monospace;
   cursor: pointer;
-  font-size: 10px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-width: 24px;
+  min-width: 28px;
   padding: 0 2px;
   user-select: none;
-  font-family: "Segoe UI", "Courier New", monospace;
-  transition: all 0.05s;
+  transition: all 0.05s ease;
+  line-height: 1.1;
 }
 
-/* --- ROUGE --- */
+.key .key-line {
+  display: block;
+  font-size: 9px;
+}
+
+/* --- Couleurs authentiques --- */
 .key-red {
   background: #cc0000;
   border-color: #ff3333;
   border-bottom-color: #990000;
-  color: #ffffff;
+  color: #fff;
 }
 
-/* --- VERT --- */
 .key-green {
   background: #00aa00;
   border-color: #33dd33;
   border-bottom-color: #007700;
-  color: #ffffff;
+  color: #fff;
 }
 
-/* --- GRIS --- */
 .key-gray {
   background: #888888;
   border-color: #bbbbbb;
   border-bottom-color: #666666;
-  color: #000000;
+  color: #000;
 }
 
-/* --- BLEU (touches de fonction) --- */
 .key-blue {
   background: #0066cc;
   border-color: #3399ff;
   border-bottom-color: #004499;
-  color: #ffffff;
+  color: #fff;
 }
 
-/* --- SPÉCIALES --- */
+/* --- Touches spéciales --- */
 .key-space {
   flex: 7;
   min-width: 100px;
@@ -87,7 +96,7 @@
   min-width: 40px;
 }
 
-/* --- INTERACTIONS --- */
+/* --- Interactions --- */
 .key:active,
 .key.active {
   transform: translateY(2px);
@@ -99,7 +108,7 @@
   filter: brightness(1.05);
 }
 
-/* --- PAVÉ NUMÉRIQUE --- */
+/* --- Pavé numérique et flèches (côté droit) --- */
 .keyboard-side {
   display: flex;
   flex-direction: column;
@@ -111,33 +120,45 @@
   display: grid;
   grid-template-columns: repeat(3, 36px);
   grid-template-rows: repeat(2, 32px);
-  gap: 3px;
+  gap: 4px;
   background: #1a1a2e;
   padding: 6px;
   border: 2px solid #2a2a4a;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .arrows .key {
-  font-size: 14px;
+  font-size: 16px;
   height: 100%;
   min-width: 0;
 }
 
-.arrow-up { grid-column: 2; grid-row: 1; }
-.arrow-left { grid-column: 1; grid-row: 2; }
-.arrow-down { grid-column: 2; grid-row: 2; }
-.arrow-right { grid-column: 3; grid-row: 2; }
+.arrow-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.arrow-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.arrow-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+.arrow-right {
+  grid-column: 3;
+  grid-row: 2;
+}
 
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 36px);
   grid-template-rows: repeat(4, 32px);
-  gap: 3px;
+  gap: 4px;
   background: #1a1a2e;
   padding: 6px;
   border: 2px solid #2a2a4a;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .numpad .numpad-row {
@@ -147,38 +168,53 @@
 .numpad .key {
   height: 100%;
   min-width: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .numpad .key-gray {
-  background: #888888;
-  border-color: #bbbbbb;
-  border-bottom-color: #666666;
-  color: #000000;
+  background: #888;
+  border-color: #bbb;
+  border-bottom-color: #666;
+  color: #000;
 }
 
 .numpad .key-green {
   background: #00aa00;
   border-color: #33dd33;
   border-bottom-color: #007700;
-  color: #ffffff;
+  color: #fff;
 }
 
-/* --- RESPONSIVE --- */
+/* --- Responsive --- */
 @media (max-width: 768px) {
   .key {
-    font-size: 7px;
-    min-width: 16px;
-    padding: 0 1px;
+    font-size: 8px;
+    min-width: 18px;
+  }
+  .key .key-line {
+    font-size: 6px;
   }
   .kbd-row {
     height: 24px;
     gap: 2px;
   }
-  .key-space { min-width: 60px; }
-  .key-wide { min-width: 28px; }
-  .numpad { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(4, 24px); }
-  .arrows { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(2, 24px); }
-  .keyboard-container { flex-direction: column; }
-  .keyboard-side { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+  .key-space {
+    min-width: 60px;
+  }
+  .key-wide {
+    min-width: 28px;
+  }
+  .keyboard-side {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .numpad {
+    grid-template-columns: repeat(3, 28px);
+    grid-template-rows: repeat(4, 24px);
+  }
+  .arrows {
+    grid-template-columns: repeat(3, 28px);
+    grid-template-rows: repeat(2, 24px);
+  }
 }

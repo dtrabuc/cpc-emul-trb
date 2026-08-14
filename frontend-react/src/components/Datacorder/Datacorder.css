@@ -1,47 +1,50 @@
-.cassette-container {
-  margin-top: 4px;
-}
+/* frontend-react/src/components/Datacorder/Datacorder.css */
 
-.cassette {
+.datacorder-wrapper {
   background: #1a1a2e;
   border: 2px solid #2a2a4a;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 12px 16px;
+  margin-top: 4px;
+}
+
+.datacorder {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
 }
 
-.cassette-top {
+.datacorder-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.datacorder-icon {
+  font-size: 28px;
+}
+
+.datacorder-title {
   color: #8888bb;
-  font-family: "Segoe UI", "Courier New", monospace;
-  font-size: 13px;
+  font-family: "Courier New", monospace;
+  font-size: 16px;
   font-weight: bold;
-}
-
-.cassette-icon {
-  font-size: 22px;
-}
-
-.cassette-title {
   letter-spacing: 2px;
 }
 
-.cassette-body {
+.datacorder-body {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex: 1;
+  flex-wrap: wrap;
 }
 
-.cassette-window {
-  width: 100px;
-  height: 40px;
+.datacorder-window {
+  width: 120px;
+  height: 48px;
   background: #0a0a1a;
   border: 2px solid #2a2a4a;
   border-radius: 4px;
@@ -50,19 +53,17 @@
   flex-shrink: 0;
 }
 
-.cassette-tape {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.datacorder-tape {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 8px;
+  height: 100%;
+  padding: 4px 10px;
 }
 
 .tape-reel {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border: 2px solid #444466;
   border-radius: 50%;
   position: relative;
@@ -74,8 +75,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border: 1px solid #444466;
   border-radius: 50%;
 }
@@ -86,7 +87,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(45deg);
-  width: 10px;
+  width: 12px;
   height: 2px;
   background: #444466;
   box-shadow: 0 -4px 0 #444466, 0 4px 0 #444466;
@@ -96,111 +97,108 @@
   flex: 1;
   height: 4px;
   background: #8888aa;
-  margin: 0 4px;
+  margin: 0 6px;
   border-radius: 2px;
 }
 
-.cassette-controls {
+.datacorder-controls {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
-.cassette-btn {
-  width: 30px;
-  height: 30px;
+.datacorder-btn {
+  width: 34px;
+  height: 34px;
   border: 2px solid #2a2a4a;
   border-radius: 4px;
   background: #0a0a1a;
   color: #666688;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.15s;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
-.cassette-btn:hover {
+.datacorder-btn:hover {
   background: #1a1a3a;
   border-color: #4a4a7a;
 }
 
-.cassette-btn:active {
+.datacorder-btn:active {
   transform: scale(0.92);
 }
 
-.cassette-btn.rec {
+.datacorder-btn.rec {
   color: #ff3333;
 }
-.cassette-btn.play {
+.datacorder-btn.play {
   color: #44ff44;
 }
-.cassette-btn.stop {
+.datacorder-btn.stop {
   color: #ff6644;
 }
-.cassette-btn.pause {
+.datacorder-btn.pause {
   color: #ffcc44;
 }
-.cassette-btn.eject {
+.datacorder-btn.eject {
   color: #44ccff;
 }
 
-.cassette-bottom {
+.datacorder-bottom {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
-.cassette-load-btn {
-  padding: 4px 16px;
+.datacorder-load-btn {
+  padding: 6px 18px;
   background: #2a2a4a;
   color: #ccccff;
   border: 1px solid #3a3a5a;
   border-radius: 4px;
   cursor: pointer;
-  font-family: "Segoe UI", "Courier New", monospace;
-  font-size: 11px;
-  transition: all 0.15s;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  transition: all 0.15s ease;
 }
 
-.cassette-load-btn:hover {
+.datacorder-load-btn:hover {
   background: #3a3a5a;
   border-color: #5a5a8a;
 }
 
-.cassette-status {
+.datacorder-status {
   color: #44ff44;
-  font-family: "Segoe UI", "Courier New", monospace;
-  font-size: 11px;
-  min-width: 40px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  min-width: 50px;
 }
 
-/* Responsive */
+/* --- Responsive --- */
 @media (max-width: 768px) {
-  .cassette {
+  .datacorder {
     flex-direction: column;
     align-items: stretch;
-    gap: 6px;
-    padding: 8px;
   }
-  .cassette-top {
+  .datacorder-top {
     justify-content: center;
   }
-  .cassette-body {
-    flex-wrap: wrap;
+  .datacorder-body {
     justify-content: center;
   }
-  .cassette-bottom {
+  .datacorder-bottom {
     justify-content: center;
-    flex-wrap: wrap;
   }
-  .cassette-window {
+  .datacorder-window {
     width: 80px;
-    height: 32px;
+    height: 36px;
   }
-  .cassette-btn {
-    width: 26px;
-    height: 26px;
-    font-size: 12px;
+  .datacorder-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
   }
 }

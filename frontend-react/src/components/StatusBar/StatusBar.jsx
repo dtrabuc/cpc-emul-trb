@@ -1,4 +1,3 @@
-// src/components/StatusBar/StatusBar.jsx
 import React from 'react';
 import './StatusBar.css';
 

@@ -1,89 +1,44 @@
-class CPCKey:
-    def __init__(self, line: int, bit_pos: int):
-        self.line = line
-        self.bit_pos = bit_pos
+# core/keyboard_state.py
 
 class KeyboardState:
-    # Touches principales
-    A = CPCKey(8, 5)
-    B = CPCKey(6, 6)
-    C = CPCKey(7, 6)
-    D = CPCKey(7, 5)
-    E = CPCKey(7, 2)
-    F = CPCKey(6, 5)
-    G = CPCKey(6, 4)
-    H = CPCKey(5, 4)
-    I = CPCKey(4, 3)
-    J = CPCKey(5, 5)
-    K = CPCKey(4, 5)
-    L = CPCKey(4, 4)
-    M = CPCKey(4, 6)
-    N = CPCKey(5, 6)
-    O = CPCKey(4, 2)
-    P = CPCKey(3, 3)
-    Q = CPCKey(8, 3)
-    R = CPCKey(6, 2)
-    S = CPCKey(7, 4)
-    T = CPCKey(6, 3)
-    U = CPCKey(5, 2)
-    V = CPCKey(6, 7)
-    W = CPCKey(7, 3)
-    X = CPCKey(7, 7)
-    Y = CPCKey(5, 3)
-    Z = CPCKey(8, 7)
-    NUM0 = CPCKey(4, 0)
-    NUM1 = CPCKey(8, 0)
-    NUM2 = CPCKey(8, 1)
-    NUM3 = CPCKey(7, 1)
-    NUM4 = CPCKey(7, 0)
-    NUM5 = CPCKey(6, 1)
-    NUM6 = CPCKey(6, 0)
-    NUM7 = CPCKey(5, 1)
-    NUM8 = CPCKey(5, 0)
-    NUM9 = CPCKey(4, 1)
+    def __init__(self):
+        # 10 lignes de 8 bits (0xFF = aucune touche enfoncée, 0x00 = bit à 0 pour touche appuyée)
+        self.rows = [0xFF] * 10
 
-    # Mapping AZERTY → CPCKey (pour ton frontend)
-    AZERTY_MAP = {
-        'a': A, 'z': Z, 'e': E, 'r': R, 't': T,
-        'y': Y, 'u': U, 'i': I, 'o': O, 'p': P,
-        'q': Q, 's': S, 'd': D, 'f': F, 'g': G,
-        'h': H, 'j': J, 'k': K, 'l': L, 'm': M,
-        'w': W, 'x': X, 'c': C, 'v': V, 'b': B,
-        'n': N,
-        '0': NUM0, '1': NUM1, '2': NUM2, '3': NUM3,
-        '4': NUM4, '5': NUM5, '6': NUM6, '7': NUM7,
-        '8': NUM8, '9': NUM9,
-        '²': NUM1, '&': NUM2, 'é': NUM3, '"': NUM4,
-        "'": NUM5, '(': NUM6, '-': NUM7, 'è': NUM8,
-        '_': NUM9, 'ç': NUM0,
+    # Matrice exacte Amstrad CPC 464 (Ligne, Bit)
+    KEY_MAP = {
+        # Ligne 0
+        'f7': (0, 7), 'f8': (0, 6), 'f9': (0, 5), 'f4': (0, 4), '4': (0, 3), '3': (0, 2), '2': (0, 1), '1': (0, 0),
+        # Ligne 1
+        'f5': (1, 7), 'f6': (1, 6), 'Enter': (1, 5), 'f1': (1, 4), 'f2': (1, 3), 'f0': (1, 2), 'Clr': (1, 1), 'Backspace': (1, 0),
+        # Ligne 2
+        'f3': (2, 7), 'Control': (2, 5), '\\': (2, 4), '`': (2, 3), 'p': (2, 2), '@': (2, 1), ':': (2, 0), ';': (2, 0),
+        # Ligne 3
+        '-': (3, 7), '*': (3, 6), 'Return': (3, 5), '+': (3, 4), 'l': (3, 3), 'k': (3, 2), 'j': (3, 1), 'h': (3, 0),
+        # Ligne 4
+        'o': (4, 7), 'i': (4, 6), 'u': (4, 5), 'y': (4, 4), 'g': (4, 3), 'f': (4, 2), 'd': (4, 1), 's': (4, 0),
+        # Ligne 5
+        '0': (5, 7), '9': (5, 6), '8': (5, 5), '7': (5, 4), 't': (5, 3), 'r': (5, 2), 'e': (5, 1), 'w': (5, 0),
+        # Ligne 6
+        '6': (6, 7), '5': (6, 6), 'm': (6, 5), 'b': (6, 3), 'v': (6, 2), 'c': (6, 1), 'x': (6, 0),
+        # Ligne 7
+        'z': (7, 7), 'CapsLock': (7, 6), 'a': (7, 5), 'Tab': (7, 4), ' ': (7, 3), 'Shift': (7, 1), 'Escape': (7, 0),
+        # Ligne 8 (Pave directionnel & Pave numerique)
+        'ArrowRight': (8, 7), 'ArrowLeft': (8, 6), 'ArrowUp': (8, 5), 'ArrowDown': (8, 4),
+        'NumPadPeriod': (8, 3), 'NumPadEnter': (8, 2), 'NumPadMinus': (8, 1), 'NumPadPlus': (8, 0)
     }
 
-    _matrix = [0xFF] * 10
+    def key_down(self, key_id):
+        if key_id in self.KEY_MAP:
+            row, bit = self.KEY_MAP[key_id]
+            self.rows[row] &= ~(1 << bit)
 
-    @classmethod
-    def press_key(cls, key: CPCKey):
-        cls._matrix[key.line] &= ~(1 << key.bit_pos)
+    def key_up(self, key_id):
+        if key_id in self.KEY_MAP:
+            row, bit = self.KEY_MAP[key_id]
+            self.rows[row] |= (1 << bit)
 
-    @classmethod
-    def release_key(cls, key: CPCKey):
-        cls._matrix[key.line] |= (1 << key.bit_pos)
-
-    @classmethod
-    def read_row(cls, row: int) -> int:
-        return cls._matrix[row] if 0 <= row < 10 else 0xFF
-
-    @classmethod
-    def press_azerty(cls, char: str):
-        key = cls.AZERTY_MAP.get(char.lower())
-        if key:
-            cls.press_key(key)
-            return True
-        return False
-
-    @classmethod
-    def release_azerty(cls, char: str):
-        key = cls.AZERTY_MAP.get(char.lower())
-        if key:
-            cls.release_key(key)
-            return True
-        return False
+    def get_row(self, row_idx):
+        if 0 <= row_idx < 10:
+            return self.rows[row_idx]
+        return 0xFF

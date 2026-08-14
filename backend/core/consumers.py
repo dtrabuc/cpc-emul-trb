@@ -1,37 +1,50 @@
+# core/consumers.py
 import json
-import asyncio
+import base64
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .emulator import Emulator
 
 class EmulatorConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.emulator = Emulator()
-        self.emulator.reset()
-        self.running = True
         await self.accept()
-        asyncio.create_task(self.send_screen_loop())
 
-    async def disconnect(self, close_code):
-        self.running = False
-        self.emulator.running = False
-
-    async def receive(self, text_data):
+    async def receive(self, text_data=None, bytes_data=None):
+        if not text_data:
+            return
+            
         data = json.loads(text_data)
-        if data.get('type') == 'key':
-            key = data.get('key')
-            if key:
-                self.emulator.press_key(key)
-                # Exécuter quelques cycles pour traiter la touche
-                self.emulator.dispatch_cycles(1000)
-        elif data.get('type') == 'cycles':
-            count = data.get('count', 16000)
-            self.emulator.dispatch_cycles(count)
+        event_type = data.get("type")
 
-    async def send_screen_loop(self):
-        while self.running:
-            state = self.emulator.get_screen_state()
-            await self.send(text_data=json.dumps({
-                'type': 'screen',
-                'data': state
-            }))
-            await asyncio.sleep(0.02)  # 50 FPS
+        # Gestion Clavier
+        if event_type == "KEY_DOWN":
+            self.emulator.keyboard.key_down(data.get("key"))
+        elif event_type == "KEY_UP":
+            self.emulator.keyboard.key_up(data.get("key"))
+
+        # Gestion Datacorder Cassette
+        elif event_type == "TAPE_LOAD":
+            raw_file = base64.b64decode(data.get("payload"))
+            filename = data.get("filename", "tape.cdt")
+            self.emulator.tape.load_tape(filename, raw_file)
+            await self.send_tape_status()
+
+        elif event_type == "TAPE_CONTROL":
+            action = data.get("action")
+            if action == "PLAY":
+                self.emulator.tape.play()
+            elif action == "STOP":
+                self.emulator.tape.stop()
+            elif action == "REWIND":
+                self.emulator.tape.rewind()
+            elif action == "EJECT":
+                self.emulator.tape.eject()
+            await self.send_tape_status()
+
+    async def send_tape_status(self):
+        tape = self.emulator.tape
+        await self.send(json.dumps({
+            "type": "TAPE_STATUS",
+            "loaded": tape.loaded,
+            "filename": tape.filename,
+            "playing": tape.playing,
+            "counter": tape.counter
+        }))

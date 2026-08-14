@@ -1,26 +1,25 @@
-:root {
-  font-family: 'Courier New', monospace;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: dark;
-  background-color: #0a0a1a;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased font-mono min-h-screen select-none;
+    margin: 0;
+    padding: 0;
+  }
 }
 
-body {
-  margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
+/* Animations et effets retro pour le Datacorder et le Canvas */
+.crt-screen {
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 66, 0.2);
 }
 
-#root {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.tape-hub-spin {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

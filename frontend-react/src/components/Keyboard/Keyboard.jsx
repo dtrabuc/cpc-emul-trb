@@ -75,49 +75,49 @@ function Keyboard({ onKeyPress }) {
   }, [onKeyPress]);
 
   return (
-    <div className="keyboard-container">
-      {/* CLAVIER PRINCIPAL */}
-      <div id="virtual-keyboard">
-        {KEY_ROWS.map((row, rowIndex) => (
-          <div key={rowIndex} className="kbd-row">
-            {row.map((label, idx) => {
-              let className = 'key';
-              if (KEY_COLORS[label]) className += ` ${KEY_COLORS[label]}`;
-              if (label === 'SPACE') className += ' key-space';
-              if (WIDE_KEYS.includes(label)) className += ' key-wide';
-              const display = SPECIAL_LABELS[label] || label;
-              return (
-                <button key={idx} className={className} onClick={() => handleClick(label)}>
-                  {display}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* PAVÉ NUMÉRIQUE + FLÈCHES */}
-      <div className="keyboard-side">
-        <div className="arrows">
-          <button className="key key-gray arrow-up" onClick={() => handleClick('ArrowUp')}>↑</button>
-          <button className="key key-gray arrow-left" onClick={() => handleClick('ArrowLeft')}>←</button>
-          <button className="key key-gray arrow-down" onClick={() => handleClick('ArrowDown')}>↓</button>
-          <button className="key key-gray arrow-right" onClick={() => handleClick('ArrowRight')}>→</button>
-        </div>
-        <div className="numpad">
-          {NUMPAD_KEYS.map((row, rowIndex) => (
-            <div key={rowIndex} className="numpad-row">
-              {row.map((key) => (
-                <button
-                  key={key}
-                  className={`key ${key === 'ENTER' ? 'key-green' : 'key-gray'}`}
-                  onClick={() => handleClick(key)}
-                >
-                  {key}
-                </button>
-              ))}
+    <div className="keyboard-wrapper">
+      <div className="keyboard-main">
+        <div id="virtual-keyboard">
+          {KEY_ROWS.map((row, rowIndex) => (
+            <div key={rowIndex} className="kbd-row">
+              {row.map((label, idx) => {
+                let className = 'key';
+                if (KEY_COLORS[label]) className += ` ${KEY_COLORS[label]}`;
+                if (label === 'SPACE') className += ' key-space';
+                if (WIDE_KEYS.includes(label)) className += ' key-wide';
+                const display = SPECIAL_LABELS[label] || label;
+                return (
+                  <button key={idx} className={className} onClick={() => handleClick(label)}>
+                    {display}
+                  </button>
+                );
+              })}
             </div>
           ))}
+        </div>
+
+        <div className="keyboard-side">
+          <div className="arrows">
+            <button className="key key-gray arrow-up" onClick={() => handleClick('ArrowUp')}>↑</button>
+            <button className="key key-gray arrow-left" onClick={() => handleClick('ArrowLeft')}>←</button>
+            <button className="key key-gray arrow-down" onClick={() => handleClick('ArrowDown')}>↓</button>
+            <button className="key key-gray arrow-right" onClick={() => handleClick('ArrowRight')}>→</button>
+          </div>
+          <div className="numpad">
+            {NUMPAD_KEYS.map((row, rowIndex) => (
+              <div key={rowIndex} className="numpad-row">
+                {row.map((key) => (
+                  <button
+                    key={key}
+                    className={`key ${key === 'ENTER' ? 'key-green' : 'key-gray'}`}
+                    onClick={() => handleClick(key)}
+                  >
+                    {key}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
