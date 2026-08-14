@@ -6,12 +6,13 @@ from .ppi import PPI
 from .ay8912 import AY8912Wrapper
 import threading
 
+
 class Emulator:
     def __init__(self):
         self.memory = Memory()
         self.crtc = CRTC6845()
-        self.gate_array = GateArray()
-        self.psg = AY8912Wrapper()   # ← décommenté
+        self.gate_array = GateArray(memory=self.memory, crtc=self.crtc)
+        self.psg = AY8912Wrapper()
         self.ppi = PPI(self.crtc, self.psg)
         self.cpu = Z80CPU()
         self.cpu.memory = self.memory
@@ -23,14 +24,27 @@ class Emulator:
         self._cycle_lock = threading.Lock()
         self._cycle_event = threading.Event()
 
+    # --- Decodage I/O -------------------------------------------------
+    # Sur un CPC reel, plusieurs peripheriques peuvent repondre au meme
+    # cycle I/O simultanement (le decodage d'adresse n'est pas exclusif).
+    # On reproduit ce comportement : chaque device teste sa propre plage
+    # d'adresses et agit s'il correspond.
+
     def io_read(self, port):
-        if 0x7F00 <= port <= 0x7F0F:
-            return self.ppi.read(port & 0xF700)
-        return 0xFF
+        value = 0xFF
+        if 0xF400 <= (port & 0xFF00) <= 0xF700:
+            value &= self.ppi.read(port)
+        if self.crtc.active_at_address(port):
+            value &= self.crtc.read(port)
+        return value & 0xFF
 
     def io_write(self, port, value):
-        if 0x7F00 <= port <= 0x7F0F:
-            self.ppi.write(port & 0xF700, value)
+        if 0xF400 <= (port & 0xFF00) <= 0xF700:
+            self.ppi.write(port, value)
+        if self.crtc.active_at_address(port):
+            self.crtc.write(port, value)
+        if self.gate_array.active_at_address(port):
+            self.gate_array.write(value)
 
     def reset(self):
         self.memory.reset()
@@ -45,7 +59,7 @@ class Emulator:
         try:
             self.load_roms('roms/cpc464_fr.rom', 'roms/basic_1.0.rom')
         except FileNotFoundError:
-            print("[EMULATOR] ROMs non trouvées")
+            print("[EMULATOR] ROMs non trouvees")
 
         self._start_cpu_thread()
 
@@ -64,11 +78,23 @@ class Emulator:
                     cycles_to_execute = 16000
 
             cycles_done = 0
-            while cycles_done < cycles_to_execute:
-                cycles_done += self.cpu.step()
+            try:
+                while cycles_done < cycles_to_execute:
+                    step_cycles = self.cpu.step()
+                    cycles_done += step_cycles
 
-            self.crtc.tick(cycles_done)
-            self.gate_array.tick(cycles_done)
+                    self.crtc.tick(step_cycles)
+                    self.gate_array.tick(step_cycles)
+
+                    if self.gate_array.interrupt:
+                        self.cpu.interrupt()
+                        self.gate_array.acknowledge_interrupt()
+            except Exception as exc:
+                # Une exception ici tuait silencieusement le thread avant ;
+                # on la journalise au minimum pour pouvoir diagnostiquer.
+                print(f"[EMULATOR] Erreur dans la boucle CPU: {exc!r}")
+                self.running = False
+                break
 
             if cycles_to_execute > 0:
                 self._cycle_event.set()
