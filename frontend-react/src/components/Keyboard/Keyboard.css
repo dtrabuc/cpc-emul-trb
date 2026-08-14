@@ -1,36 +1,31 @@
-/* --- CONTENEUR PRINCIPAL --- */
-.keyboard-wrapper {
-  margin-top: 4px;
-}
-
-.keyboard-main {
+/* --- CONTENEUR --- */
+.keyboard-container {
   display: flex;
   gap: 8px;
-  align-items: stretch;
+  margin-top: 8px;
 }
 
-/* --- CLAVIER PRINCIPAL --- */
 #virtual-keyboard {
   flex: 1;
   background-color: #1a1a2e;
   border: 2px solid #2a2a4a;
-  padding: 6px 8px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   border-radius: 4px;
   min-width: 0;
 }
 
 .kbd-row {
   display: flex;
-  gap: 3px;
-  height: 30px;
+  gap: 4px;
+  height: 32px;
 }
 
-/* --- TOUCHES --- */
+/* --- TOUCHES (BLANCHES PAR DÉFAUT) --- */
 .key {
-  background: #e0e0e0;
+  background: #e8e8e8;
   color: #000000;
   border: 1px solid #aaa;
   border-bottom: 3px solid #888;
@@ -38,27 +33,18 @@
   font-weight: bold;
   cursor: pointer;
   font-size: 10px;
-  transition: transform 0.05s ease, background 0.05s ease;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
+  flex: 1;
+  min-width: 24px;
   padding: 0 2px;
   user-select: none;
   font-family: "Segoe UI", "Courier New", monospace;
-  flex: 1;
-  height: 100%;
-  line-height: 1.1;
-  gap: 0;
+  transition: all 0.05s;
 }
 
-.key .key-line {
-  display: block;
-  font-size: 9px;
-}
-
-/* --- COULEURS --- */
+/* --- ROUGE --- */
 .key-red {
   background: #cc0000;
   border-color: #ff3333;
@@ -66,6 +52,7 @@
   color: #ffffff;
 }
 
+/* --- VERT --- */
 .key-green {
   background: #00aa00;
   border-color: #33dd33;
@@ -73,6 +60,7 @@
   color: #ffffff;
 }
 
+/* --- GRIS --- */
 .key-gray {
   background: #888888;
   border-color: #bbbbbb;
@@ -80,10 +68,23 @@
   color: #000000;
 }
 
-/* --- TOUCHES SPÉCIALES --- */
+/* --- BLEU (touches de fonction) --- */
+.key-blue {
+  background: #0066cc;
+  border-color: #3399ff;
+  border-bottom-color: #004499;
+  color: #ffffff;
+}
+
+/* --- SPÉCIALES --- */
+.key-space {
+  flex: 7;
+  min-width: 100px;
+}
+
 .key-wide {
-  flex: 1.5 !important;
-  min-width: 36px;
+  flex: 1.5;
+  min-width: 40px;
 }
 
 /* --- INTERACTIONS --- */
@@ -98,7 +99,7 @@
   filter: brightness(1.05);
 }
 
-/* --- PAVÉ NUMÉRIQUE & FLÈCHES (côté droit) --- */
+/* --- PAVÉ NUMÉRIQUE --- */
 .keyboard-side {
   display: flex;
   flex-direction: column;
@@ -106,51 +107,32 @@
   flex-shrink: 0;
 }
 
-/* Flèches */
 .arrows {
   display: grid;
-  grid-template-columns: repeat(3, 32px);
-  grid-template-rows: repeat(2, 28px);
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(2, 32px);
   gap: 3px;
   background: #1a1a2e;
   padding: 6px;
   border: 2px solid #2a2a4a;
   border-radius: 4px;
-  align-content: center;
 }
 
 .arrows .key {
-  background: #888888;
-  border-color: #bbbbbb;
-  border-bottom-color: #666666;
-  color: #000000;
   font-size: 14px;
   height: 100%;
   min-width: 0;
 }
 
-.arrow-up {
-  grid-column: 2;
-  grid-row: 1;
-}
-.arrow-left {
-  grid-column: 1;
-  grid-row: 2;
-}
-.arrow-down {
-  grid-column: 2;
-  grid-row: 2;
-}
-.arrow-right {
-  grid-column: 3;
-  grid-row: 2;
-}
+.arrow-up { grid-column: 2; grid-row: 1; }
+.arrow-left { grid-column: 1; grid-row: 2; }
+.arrow-down { grid-column: 2; grid-row: 2; }
+.arrow-right { grid-column: 3; grid-row: 2; }
 
-/* Pavé numérique */
 .numpad {
   display: grid;
-  grid-template-columns: repeat(3, 32px);
-  grid-template-rows: repeat(4, 28px);
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(4, 32px);
   gap: 3px;
   background: #1a1a2e;
   padding: 6px;
@@ -163,13 +145,16 @@
 }
 
 .numpad .key {
+  height: 100%;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.numpad .key-gray {
   background: #888888;
   border-color: #bbbbbb;
   border-bottom-color: #666666;
   color: #000000;
-  font-size: 12px;
-  height: 100%;
-  min-width: 0;
 }
 
 .numpad .key-green {
@@ -179,35 +164,21 @@
   color: #ffffff;
 }
 
-.numpad .key:hover {
-  filter: brightness(1.1);
-}
-
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .key {
     font-size: 7px;
     min-width: 16px;
-  }
-  .key .key-line {
-    font-size: 6px;
+    padding: 0 1px;
   }
   .kbd-row {
-    height: 22px;
+    height: 24px;
     gap: 2px;
   }
-  .key-wide {
-    min-width: 24px;
-  }
-  .numpad {
-    grid-template-columns: repeat(3, 26px);
-    grid-template-rows: repeat(4, 22px);
-  }
-  .arrows {
-    grid-template-columns: repeat(3, 26px);
-    grid-template-rows: repeat(2, 22px);
-  }
-  .keyboard-side {
-    gap: 4px;
-  }
+  .key-space { min-width: 60px; }
+  .key-wide { min-width: 28px; }
+  .numpad { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(4, 24px); }
+  .arrows { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(2, 24px); }
+  .keyboard-container { flex-direction: column; }
+  .keyboard-side { flex-direction: row; justify-content: center; flex-wrap: wrap; }
 }

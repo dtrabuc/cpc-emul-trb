@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { api } from '../api/client';
-import { getScancode } from '../utils/keyMapping';
+
+const API_BASE = '/api';
 
 export function useEmulator() {
   const [screen, setScreen] = useState({
     chars: [],
     colors: [],
-    cursor_x: 0,
-    cursor_y: 0,
+    cursor_x: 5,    // Position par défaut du curseur après "Ready"
+    cursor_y: 8,     // Ligne après "Ready"
     width: 80,
     height: 40,
     mode: 1,
@@ -15,67 +15,64 @@ export function useEmulator() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const intervalRef = useRef(null);
+  const firstFetchDone = useRef(false);
 
   const fetchScreen = useCallback(async () => {
     try {
-      const data = await api.getState();
-      setScreen({
-        chars: data.chars || [],
-        colors: data.colors || [],
-        cursor_x: data.cursor_x || 0,
-        cursor_y: data.cursor_y || 0,
-        width: data.width || 80,
-        height: data.height || 40,
-        mode: data.mode || 1,
-      });
-      setError(null);
+      const response = await fetch(`${API_BASE}/state/`);
+      if (!response.ok) throw new Error('Erreur réseau');
+      const data = await response.json();
+
+      // Si le backend renvoie des données, on les utilise
+      if (data.chars && data.chars.length > 0) {
+        setScreen({
+          chars: data.chars || [],
+          colors: data.colors || [],
+          cursor_x: data.cursor_x || 0,
+          cursor_y: data.cursor_y || 0,
+          width: data.width || 80,
+          height: data.height || 40,
+          mode: data.mode || 1,
+        });
+        setError(null);
+      }
+      // Sinon, on garde l'écran de démarrage
+      setLoading(false);
+      firstFetchDone.current = true;
     } catch (err) {
       setError('Erreur de connexion au backend');
       console.error(err);
-    } finally {
       setLoading(false);
     }
   }, []);
 
   const sendKey = useCallback(async (key) => {
     try {
-      // Récupérer le scancode
-      const scancode = getScancode(key);
-      
-      // Si scancode = 0, on envoie quand même la touche brute
-      // pour permettre au backend de gérer le mapping
-      await api.sendKey(key);
-      // Rafraîchir l'écran après la touche
+      await fetch(`${API_BASE}/key/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key }),
+      });
+      // Après l'envoi d'une touche, on rafraîchit l'écran
       await fetchScreen();
     } catch (err) {
-      console.error('Erreur lors de l\'envoi de la touche:', err);
+      console.error('Erreur clavier:', err);
     }
   }, [fetchScreen]);
 
   const reset = useCallback(async () => {
     try {
-      await api.reset();
+      await fetch(`${API_BASE}/reset/`, { method: 'POST' });
       await fetchScreen();
     } catch (err) {
-      console.error('Erreur lors de la réinitialisation:', err);
+      console.error('Erreur reset:', err);
     }
   }, [fetchScreen]);
 
   useEffect(() => {
     fetchScreen();
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
     intervalRef.current = setInterval(fetchScreen, 50);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
+    return () => clearInterval(intervalRef.current);
   }, [fetchScreen]);
 
   return {
@@ -84,6 +81,5 @@ export function useEmulator() {
     error,
     sendKey,
     reset,
-    fetchScreen,
   };
 }

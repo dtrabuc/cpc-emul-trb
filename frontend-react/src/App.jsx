@@ -11,7 +11,6 @@ function App() {
 
   const handleFileLoad = (file) => {
     console.log('Fichier chargé:', file.name);
-    // Ici, logique d'envoi au backend plus tard
   };
 
   return (
@@ -24,6 +23,7 @@ function App() {
         width={screen.width}
         height={screen.height}
         mode={screen.mode}
+        loading={loading}
       />
       <Keyboard onKeyPress={sendKey} />
       <Cassette onFileLoad={handleFileLoad} />
