@@ -1,4 +1,3 @@
-# Dans core/io_device.py
 from abc import ABC, abstractmethod
 
 class IODevice(ABC):
@@ -7,9 +6,5 @@ class IODevice(ABC):
         pass
 
     @abstractmethod
-    def write(self, port: int, value: int):
-        pass
-
-    @abstractmethod
-    def is_active(self, port: int) -> bool:
+    def write(self, port: int, value: int) -> None:
         pass

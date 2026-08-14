@@ -1,24 +1,21 @@
-import ay8910_wrapper
+# core/ay8912.py
+# Implémentation simplifiée de l'AY-3-8912 (stockage des registres)
 
 class AY8912Wrapper:
     def __init__(self):
-        self.ay = ay8910_wrapper.AY8910(clock=1000000, sample_rate=44100)
-        self.regs = [0] * 16
-        self.index = 0
-        
+        self._regs = [0] * 16
+        self._index = 0
+
     def reset(self):
-        self.ay.reset()
-        self.regs = [0] * 16
-        
-    def write(self, addr, value):
-        if addr == 0:  # Address
-            self.index = value & 0x0F
-        else:          # Data
-            self.regs[self.index] = value
-            self.ay.write_register(self.index, value)
-            
-    def read(self, addr):
-        if addr == 0:
-            return self.index
-        else:
-            return self.ay.read_register(self.index) if self.index < 16 else 0
+        self._regs = [0] * 16
+        self._index = 0
+
+    def write(self, value: int):
+        if self._index < 16:
+            self._regs[self._index] = value & 0xFF
+
+    def read(self) -> int:
+        return self._regs[self._index] if self._index < 16 else 0xFF
+
+    def set_address(self, addr: int):
+        self._index = addr & 0x0F

@@ -12,71 +12,67 @@ export function useEmulator() {
     height: 40,
     mode: 1,
   });
-  const [status, setStatus] = useState('idle'); // idle | connecting | connected | error
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimeout = useRef(null);
 
   const connect = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      return;
-    }
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
 
     setStatus('connecting');
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('[WS] Connecté au backend');
+      console.log('[WS] Connecté');
       setStatus('connected');
       setError(null);
+      // Démarrer le cycle d'exécution
+      sendCycles(16000);
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'screen') {
-          const screenData = data.data;
+          const d = data.data;
           setScreen({
-            chars: screenData.chars || [],
-            colors: screenData.colors || [],
-            cursor_x: screenData.cursor_x || 0,
-            cursor_y: screenData.cursor_y || 0,
-            width: screenData.width || 80,
-            height: screenData.height || 40,
-            mode: screenData.mode || 1,
+            chars: d.chars || [],
+            colors: d.colors || [],
+            cursor_x: d.cursor_x || 0,
+            cursor_y: d.cursor_y || 0,
+            width: d.width || 80,
+            height: d.height || 40,
+            mode: d.mode || 1,
           });
+          // Demander le prochain lot de cycles
+          sendCycles(16000);
         }
       } catch (e) {
-        console.error('[WS] Erreur de parsing:', e);
+        console.error('[WS] Erreur parsing:', e);
       }
     };
 
     ws.onclose = () => {
       console.log('[WS] Déconnecté');
       setStatus('error');
-      // Reconnexion automatique après 2s
-      reconnectTimeout.current = setTimeout(() => {
-        connect();
-      }, 2000);
+      reconnectTimeout.current = setTimeout(connect, 2000);
     };
 
     ws.onerror = (err) => {
       console.error('[WS] Erreur:', err);
-      setError('Erreur de connexion WebSocket');
+      setError('Erreur de connexion');
     };
   }, []);
 
-  const disconnect = useCallback(() => {
-    if (reconnectTimeout.current) {
-      clearTimeout(reconnectTimeout.current);
-      reconnectTimeout.current = null;
+  const sendCycles = useCallback((count) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'cycles',
+        count: count,
+      }));
     }
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    setStatus('idle');
   }, []);
 
   const sendKey = useCallback((key) => {
@@ -86,25 +82,29 @@ export function useEmulator() {
         key: key,
       }));
     } else {
-      console.warn('[WS] Non connecté, impossible d\'envoyer la touche:', key);
+      console.warn('[WS] Non connecté, touche ignorée:', key);
     }
   }, []);
 
   const reset = useCallback(() => {
-    // On envoie une commande de reset via WebSocket
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        type: 'reset',
-      }));
+    // Le reset se fait via la reconnexion
+    if (wsRef.current) {
+      wsRef.current.close();
     }
-  }, []);
+    setTimeout(connect, 100);
+  }, [connect]);
 
   useEffect(() => {
     connect();
     return () => {
-      disconnect();
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
     };
-  }, [connect, disconnect]);
+  }, [connect]);
 
   return {
     screen,
