@@ -1,0 +1,206 @@
+.cassette-container {
+  margin-top: 4px;
+}
+
+.cassette {
+  background: #1a1a2e;
+  border: 2px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cassette-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8888bb;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.cassette-icon {
+  font-size: 22px;
+}
+
+.cassette-title {
+  letter-spacing: 2px;
+}
+
+.cassette-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.cassette-window {
+  width: 100px;
+  height: 40px;
+  background: #0a0a1a;
+  border: 2px solid #2a2a4a;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cassette-tape {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+}
+
+.tape-reel {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #444466;
+  border-radius: 50%;
+  position: relative;
+}
+
+.tape-reel::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border: 1px solid #444466;
+  border-radius: 50%;
+}
+
+.tape-reel.left::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 10px;
+  height: 2px;
+  background: #444466;
+  box-shadow: 0 -4px 0 #444466, 0 4px 0 #444466;
+}
+
+.tape-band {
+  flex: 1;
+  height: 4px;
+  background: #8888aa;
+  margin: 0 4px;
+  border-radius: 2px;
+}
+
+.cassette-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.cassette-btn {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #2a2a4a;
+  border-radius: 4px;
+  background: #0a0a1a;
+  color: #666688;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cassette-btn:hover {
+  background: #1a1a3a;
+  border-color: #4a4a7a;
+}
+
+.cassette-btn:active {
+  transform: scale(0.92);
+}
+
+.cassette-btn.rec {
+  color: #ff3333;
+}
+.cassette-btn.play {
+  color: #44ff44;
+}
+.cassette-btn.stop {
+  color: #ff6644;
+}
+.cassette-btn.pause {
+  color: #ffcc44;
+}
+.cassette-btn.eject {
+  color: #44ccff;
+}
+
+.cassette-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cassette-load-btn {
+  padding: 4px 16px;
+  background: #2a2a4a;
+  color: #ccccff;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.cassette-load-btn:hover {
+  background: #3a3a5a;
+  border-color: #5a5a8a;
+}
+
+.cassette-status {
+  color: #44ff44;
+  font-family: "Segoe UI", "Courier New", monospace;
+  font-size: 11px;
+  min-width: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cassette {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 8px;
+  }
+  .cassette-top {
+    justify-content: center;
+  }
+  .cassette-body {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cassette-bottom {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cassette-window {
+    width: 80px;
+    height: 32px;
+  }
+  .cassette-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}

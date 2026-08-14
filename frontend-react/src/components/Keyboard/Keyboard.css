@@ -1,0 +1,213 @@
+/* --- CONTENEUR PRINCIPAL --- */
+.keyboard-wrapper {
+  margin-top: 4px;
+}
+
+.keyboard-main {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+/* --- CLAVIER PRINCIPAL --- */
+#virtual-keyboard {
+  flex: 1;
+  background-color: #1a1a2e;
+  border: 2px solid #2a2a4a;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-radius: 4px;
+  min-width: 0;
+}
+
+.kbd-row {
+  display: flex;
+  gap: 3px;
+  height: 30px;
+}
+
+/* --- TOUCHES --- */
+.key {
+  background: #e0e0e0;
+  color: #000000;
+  border: 1px solid #aaa;
+  border-bottom: 3px solid #888;
+  border-radius: 3px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 10px;
+  transition: transform 0.05s ease, background 0.05s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 0 2px;
+  user-select: none;
+  font-family: "Segoe UI", "Courier New", monospace;
+  flex: 1;
+  height: 100%;
+  line-height: 1.1;
+  gap: 0;
+}
+
+.key .key-line {
+  display: block;
+  font-size: 9px;
+}
+
+/* --- COULEURS --- */
+.key-red {
+  background: #cc0000;
+  border-color: #ff3333;
+  border-bottom-color: #990000;
+  color: #ffffff;
+}
+
+.key-green {
+  background: #00aa00;
+  border-color: #33dd33;
+  border-bottom-color: #007700;
+  color: #ffffff;
+}
+
+.key-gray {
+  background: #888888;
+  border-color: #bbbbbb;
+  border-bottom-color: #666666;
+  color: #000000;
+}
+
+/* --- TOUCHES SPÉCIALES --- */
+.key-wide {
+  flex: 1.5 !important;
+  min-width: 36px;
+}
+
+/* --- INTERACTIONS --- */
+.key:active,
+.key.active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  filter: brightness(0.9);
+}
+
+.key:hover {
+  filter: brightness(1.05);
+}
+
+/* --- PAVÉ NUMÉRIQUE & FLÈCHES (côté droit) --- */
+.keyboard-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Flèches */
+.arrows {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-template-rows: repeat(2, 28px);
+  gap: 3px;
+  background: #1a1a2e;
+  padding: 6px;
+  border: 2px solid #2a2a4a;
+  border-radius: 4px;
+  align-content: center;
+}
+
+.arrows .key {
+  background: #888888;
+  border-color: #bbbbbb;
+  border-bottom-color: #666666;
+  color: #000000;
+  font-size: 14px;
+  height: 100%;
+  min-width: 0;
+}
+
+.arrow-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.arrow-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.arrow-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+.arrow-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+/* Pavé numérique */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-template-rows: repeat(4, 28px);
+  gap: 3px;
+  background: #1a1a2e;
+  padding: 6px;
+  border: 2px solid #2a2a4a;
+  border-radius: 4px;
+}
+
+.numpad .numpad-row {
+  display: contents;
+}
+
+.numpad .key {
+  background: #888888;
+  border-color: #bbbbbb;
+  border-bottom-color: #666666;
+  color: #000000;
+  font-size: 12px;
+  height: 100%;
+  min-width: 0;
+}
+
+.numpad .key-green {
+  background: #00aa00;
+  border-color: #33dd33;
+  border-bottom-color: #007700;
+  color: #ffffff;
+}
+
+.numpad .key:hover {
+  filter: brightness(1.1);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .key {
+    font-size: 7px;
+    min-width: 16px;
+  }
+  .key .key-line {
+    font-size: 6px;
+  }
+  .kbd-row {
+    height: 22px;
+    gap: 2px;
+  }
+  .key-wide {
+    min-width: 24px;
+  }
+  .numpad {
+    grid-template-columns: repeat(3, 26px);
+    grid-template-rows: repeat(4, 22px);
+  }
+  .arrows {
+    grid-template-columns: repeat(3, 26px);
+    grid-template-rows: repeat(2, 22px);
+  }
+  .keyboard-side {
+    gap: 4px;
+  }
+}

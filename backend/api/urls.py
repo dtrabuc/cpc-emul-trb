@@ -3,4 +3,6 @@ from .views import StateView
 
 urlpatterns = [
     path('state/', StateView.as_view(), name='state'),
+    path('key/', KeyPressView.as_view(), name='key'),
+    path('reset/', ResetView.as_view(), name='reset'),
 ]
