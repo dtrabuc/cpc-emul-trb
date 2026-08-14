@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amstrad CPC Emulator - AZERTY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="cpc-container">
+    
+    <!-- Écran / Moniteur -->
+    <div id="monitor">
+      <div id="screen-overlay"></div>
+      <main id="screen" aria-label="Écran CPC 80x40"></main>
+    </div>
+
+    <!-- Clavier CPC Authentique (AZERTY FR) -->
+    <div id="virtual-keyboard">
+      <!-- Ligne 1 : Chiffres & Effacement -->
+      <div class="kbd-row">
+        <button class="key key-red" data-key="Escape">ESC</button>
+        <button class="key" data-key="&">&amp;</button>
+        <button class="key" data-key="é">É</button>
+        <button class="key" data-key="&quot;">"</button>
+        <button class="key" data-key="'">'</button>
+        <button class="key" data-key="(">(</button>
+        <button class="key" data-key="-">-</button>
+        <button class="key" data-key="è">È</button>
+        <button class="key" data-key="_">_</button>
+        <button class="key" data-key="ç">Ç</button>
+        <button class="key" data-key="à">À</button>
+        <button class="key" data-key=")">)</button>
+        <button class="key" data-key="=">=</button>
+        <button class="key key-red" data-key="Backspace">DEL</button>
+      </div>
+      
+      <!-- Ligne 2 : AZERTY -->
+      <div class="kbd-row">
+        <button class="key key-red" data-key="Control">CTRL</button>
+        <button class="key" data-key="a">A</button>
+        <button class="key" data-key="z">Z</button>
+        <button class="key" data-key="e">E</button>
+        <button class="key" data-key="r">R</button>
+        <button class="key" data-key="t">T</button>
+        <button class="key" data-key="y">Y</button>
+        <button class="key" data-key="u">U</button>
+        <button class="key" data-key="i">I</button>
+        <button class="key" data-key="o">O</button>
+        <button class="key" data-key="p">P</button>
+        <button class="key" data-key="^">^</button>
+        <button class="key" data-key="$">$</button>
+        <button class="key key-blue key-wide" data-key="Enter">RETURN</button>
+      </div>
+
+      <!-- Ligne 3 : QSDFG -->
+      <div class="kbd-row">
+        <button class="key key-green key-wide" data-key="CapsLock">CAPS LOCK</button>
+        <button class="key" data-key="q">Q</button>
+        <button class="key" data-key="s">S</button>
+        <button class="key" data-key="d">D</button>
+        <button class="key" data-key="f">F</button>
+        <button class="key" data-key="g">G</button>
+        <button class="key" data-key="h">H</button>
+        <button class="key" data-key="j">J</button>
+        <button class="key" data-key="k">K</button>
+        <button class="key" data-key="l">L</button>
+        <button class="key" data-key="m">M</button>
+        <button class="key" data-key="ù">Ù</button>
+        <button class="key" data-key="*">*</button>
+        <button class="key key-green" data-key="Copy">COPY</button>
+      </div>
+
+      <!-- Ligne 4 : WXCVB -->
+      <div class="kbd-row">
+        <button class="key key-green key-wide" data-key="Shift">SHIFT</button>
+        <button class="key" data-key="w">W</button>
+        <button class="key" data-key="x">X</button>
+        <button class="key" data-key="c">C</button>
+        <button class="key" data-key="v">V</button>
+        <button class="key" data-key="b">B</button>
+        <button class="key" data-key="n">N</button>
+        <button class="key" data-key=",">,</button>
+        <button class="key" data-key=";">;</button>
+        <button class="key" data-key=":">:</button>
+        <button class="key" data-key="!">!</button>
+        <button class="key key-green key-wide" data-key="Shift">SHIFT</button>
+      </div>
+
+      <!-- Ligne 5 : Espace -->
+      <div class="kbd-row">
+        <button class="key key-gray key-space" data-key=" ">SPACE</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="keyboard.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

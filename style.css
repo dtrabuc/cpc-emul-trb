@@ -1,0 +1,155 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background-color: #0d0d0d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Courier New", monospace;
+  overflow: hidden;
+}
+
+/* Boîtier CPC de couleur anthracite sombre */
+#cpc-container {
+  display: flex;
+  flex-direction: column;
+  width: 98vw;
+  height: 96vh;
+  background: #1c1c1c;
+  border: 10px solid #111;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 25px rgba(0,0,0,0.9);
+}
+
+/* Moniteur CRT */
+#monitor {
+  position: relative;
+  flex: 1;
+  background-color: #000;
+  border: 4px solid #2a2a2a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Overlay Balayage CRT */
+#screen-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Grille 80x40 flexible */
+#screen {
+  display: grid;
+  grid-template-columns: repeat(80, 1fr);
+  grid-template-rows: repeat(40, 1fr);
+  width: 100%;
+  height: 100%;
+  background-color: #000080; /* Bleu Amstrad CPC */
+  color: #ffff00;            /* Jaune Amstrad CPC */
+  user-select: none;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: clamp(6px, 1.1vw, 14px);
+  line-height: 1;
+  white-space: pre;
+}
+
+.cell.cursor {
+  background-color: #ffff00;
+  color: #000080;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Clavier Amstrad CPC */
+#virtual-keyboard {
+  height: 230px;
+  background-color: #181818;
+  border: 2px solid #000;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  height: 18%;
+}
+
+/* Style de touche par défaut (Noire) */
+.key {
+  background: #252525;
+  color: #ffffff;
+  border: 1px solid #3d3d3d;
+  border-bottom: 3px solid #000000;
+  border-radius: 3px;
+  flex: 1;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 11px;
+  transition: transform 0.05s ease, background 0.05s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Couleurs authentiques CPC */
+.key-red {
+  background: #b22222;
+  border-color: #dc143c;
+  color: #ffffff;
+}
+
+.key-blue {
+  background: #1e3d59;
+  border-color: #17b978;
+  color: #ffffff;
+}
+
+.key-green {
+  background: #2e7d32;
+  border-color: #4caf50;
+  color: #ffffff;
+}
+
+.key-gray {
+  background: #757575;
+  border-color: #9e9e9e;
+  color: #000000;
+}
+
+/* Interactions */
+.key:active, .key.active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  filter: brightness(1.2);
+}
+
+.key-wide { flex: 1.5; }
+.key-space { flex: 7; }
