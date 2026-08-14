@@ -63,16 +63,12 @@ class PPI(IODevice):
         row = value & 0x0F
         if row < 10:
             keyboard_data = self._keyboard.read_row(row)
-            # Le PPI met automatiquement keyboard_data sur le port A
-            # si le port A est en entrée
             if self._port_a_direction == IODirection.INPUT:
                 self._port_a = keyboard_data
         self._tape_motor_on = (value & 0x80) != 0
 
-    def press_key(self, key: str):
-        """Appuie sur une touche AZERTY"""
+    def press_key(self, key: str) -> bool:
         if KeyboardState.press_azerty(key):
-            # Si le port A est en entrée, la touche est immédiatement lue
             if self._port_a_direction == IODirection.INPUT:
                 row = self._port_c & 0x0F
                 if row < 10:
@@ -80,8 +76,7 @@ class PPI(IODevice):
             return True
         return False
 
-    def release_key(self, key: str):
-        """Relâche une touche AZERTY"""
+    def release_key(self, key: str) -> bool:
         if KeyboardState.release_azerty(key):
             if self._port_a_direction == IODirection.INPUT:
                 row = self._port_c & 0x0F

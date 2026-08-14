@@ -3,33 +3,34 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-remplace-ça-par-une-clé-aléatoire'
-
+SECRET_KEY = 'django-insecure-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'  # change en prod
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 
+# --- Applications installées ---
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Apps tierces
+
+    # tierces
     'rest_framework',
     'corsheaders',
     'channels',
-    # TES APPS LOCALES
-    'core',      # <-- AJOUTE CECI
-    'api',       # <-- AJOUTE CECI
+
+    # locales
+    'core',
+    'api',
 ]
 
+# --- Middlewares (ordre important) ---
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',          # CORS en premier
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # pour admin
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -37,8 +38,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'cpc_emulator.urls'
-
+# --- Templates (pour l’admin) ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -55,9 +55,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cpc_emulator.wsgi.application'
-ASGI_APPLICATION = 'cpc_emulator.asgi.application'
-
+# --- Base de données (SQLite pour le dev) ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -65,32 +63,45 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = []
+# --- Authentification, mots de passe, etc. ---
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
 
+# --- Internationalisation ---
 LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_TZ = True
 
+# --- Fichiers statiques et médias ---
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# --- CORS (autorise ton frontend) ---
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://localhost:3000",
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
 ]
 
+# --- Django REST Framework ---
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_PARSER_CLASSES': ['rest_framework.parsers.JSONParser'],
 }
 
+# --- Channels (WebSocket) ---
+ASGI_APPLICATION = 'cpc_emulator.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+# --- Clé par défaut (à changer en prod) ---
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

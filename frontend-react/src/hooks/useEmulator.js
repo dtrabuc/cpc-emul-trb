@@ -28,8 +28,7 @@ export function useEmulator() {
       console.log('[WS] Connecté');
       setStatus('connected');
       setError(null);
-      // Démarrer le cycle d'exécution
-      sendCycles(16000);
+      ws.send(JSON.stringify({ type: 'cycles', count: 16000 }));
     };
 
     ws.onmessage = (event) => {
@@ -46,8 +45,7 @@ export function useEmulator() {
             height: d.height || 40,
             mode: d.mode || 1,
           });
-          // Demander le prochain lot de cycles
-          sendCycles(16000);
+          ws.send(JSON.stringify({ type: 'cycles', count: 16000 }));
         }
       } catch (e) {
         console.error('[WS] Erreur parsing:', e);
@@ -66,43 +64,25 @@ export function useEmulator() {
     };
   }, []);
 
-  const sendCycles = useCallback((count) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        type: 'cycles',
-        count: count,
-      }));
-    }
-  }, []);
-
   const sendKey = useCallback((key) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        type: 'key',
-        key: key,
-      }));
+      wsRef.current.send(JSON.stringify({ type: 'key', key }));
     } else {
       console.warn('[WS] Non connecté, touche ignorée:', key);
     }
   }, []);
 
   const reset = useCallback(() => {
-    // Le reset se fait via la reconnexion
-    if (wsRef.current) {
-      wsRef.current.close();
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'reset' }));
     }
-    setTimeout(connect, 100);
-  }, [connect]);
+  }, []);
 
   useEffect(() => {
     connect();
     return () => {
-      if (reconnectTimeout.current) {
-        clearTimeout(reconnectTimeout.current);
-      }
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
+      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+      if (wsRef.current) wsRef.current.close();
     };
   }, [connect]);
 

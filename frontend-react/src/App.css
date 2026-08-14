@@ -78,3 +78,25 @@ body {
     font-size: 18px;
   }
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-settings {
+  background: none;
+  border: 1px solid #2a2a4a;
+  color: #8888bb;
+  font-size: 20px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-settings:hover {
+  background: #2a2a4a;
+  color: #ccccff;
+}

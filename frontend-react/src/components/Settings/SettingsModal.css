@@ -1,0 +1,65 @@
+.settings-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.settings-modal {
+  background: #1a1a2e;
+  border: 2px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  color: #ccccff;
+}
+
+.settings-modal h2 {
+  margin-bottom: 16px;
+  font-weight: normal;
+}
+
+.settings-group {
+  margin-bottom: 16px;
+}
+
+.settings-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #8888bb;
+}
+
+.settings-group input[type="file"] {
+  width: 100%;
+  padding: 6px;
+  background: #0a0a1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+  color: #ccccff;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.settings-actions button {
+  padding: 6px 16px;
+  background: #2a2a4a;
+  color: #ccccff;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+}
+
+.settings-actions button:hover {
+  background: #3a3a5a;
+}
