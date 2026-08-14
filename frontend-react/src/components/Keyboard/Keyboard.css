@@ -1,5 +1,3 @@
-/* frontend-react/src/components/Keyboard/Keyboard.css */
-
 .keyboard-wrapper {
   background: #181818;
   border: 2px solid #2a2a4a;
@@ -28,7 +26,6 @@
   height: 32px;
 }
 
-/* --- Touche de base (blanche) --- */
 .key {
   background: #e8e8e8;
   color: #000;
@@ -51,12 +48,6 @@
   line-height: 1.1;
 }
 
-.key .key-line {
-  display: block;
-  font-size: 9px;
-}
-
-/* --- Couleurs authentiques --- */
 .key-red {
   background: #cc0000;
   border-color: #ff3333;
@@ -85,7 +76,6 @@
   color: #fff;
 }
 
-/* --- Touches spéciales --- */
 .key-space {
   flex: 7;
   min-width: 100px;
@@ -96,7 +86,6 @@
   min-width: 40px;
 }
 
-/* --- Interactions --- */
 .key:active,
 .key.active {
   transform: translateY(2px);
@@ -108,7 +97,6 @@
   filter: brightness(1.05);
 }
 
-/* --- Pavé numérique et flèches (côté droit) --- */
 .keyboard-side {
   display: flex;
   flex-direction: column;
@@ -116,6 +104,7 @@
   flex-shrink: 0;
 }
 
+/* Flèches en T inversé */
 .arrows {
   display: grid;
   grid-template-columns: repeat(3, 36px);
@@ -185,14 +174,10 @@
   color: #fff;
 }
 
-/* --- Responsive --- */
 @media (max-width: 768px) {
   .key {
     font-size: 8px;
     min-width: 18px;
-  }
-  .key .key-line {
-    font-size: 6px;
   }
   .kbd-row {
     height: 24px;

@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import './Keyboard.css';
 
-// LAYOUT EXACT DU FICHIER EXCEL
+// LAYOUT IDENTIQUE À L'IMAGE (avec touches de fonction)
 const KEY_ROWS = [
-  ['Esc', '1&', '2é', '3"', "4'", '5(', '6]', '7è', '8!', '9ç', '0à', '[)', '=-_', 'CLR', 'DEL'],
+  ['Esc', '1&', '2é', '3"', "4'", '5(', '6]', '7è', '8!', '9ç', '0à', '[)', '_-', 'CLR', 'DEL'],
   ['TAB', 'A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '/^', '<*', 'ENTER'],
   ['CAPS LOCK', 'Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', '%ù', '>#'],
   ['SHIFT', 'W', 'X', 'C', 'V', 'B', 'N', '?,', '.;', '/:', '="+', '@$', 'SHIFT'],
@@ -14,33 +14,25 @@ const NUMPAD_KEYS = [
   ['7', '8', '9'],
   ['4', '5', '6'],
   ['1', '2', '3'],
-  ['0', '.', 'ENTER'],
+  ['0', '.', 'COPY'],
 ];
 
 // COULEURS AUTHENTIQUES
 const KEY_COLORS = {
-  'Esc': 'key-red',
-  'CLR': 'key-red',
-  'DEL': 'key-red',
+  'F1': 'key-blue', 'F2': 'key-blue', 'F3': 'key-blue',
+  'F4': 'key-blue', 'F5': 'key-blue', 'F6': 'key-blue',
+  'F7': 'key-blue', 'F8': 'key-blue', 'F9': 'key-blue',
+  'Esc': 'key-red', 'CLR': 'key-red', 'DEL': 'key-red',
   'ENTER': 'key-green',
-  'TAB': 'key-gray',
-  'CAPS LOCK': 'key-gray',
-  'SHIFT': 'key-gray',
-  'CTRL': 'key-gray',
-  'SPACE': 'key-gray',
+  'TAB': 'key-gray', 'CAPS LOCK': 'key-gray',
+  'SHIFT': 'key-gray', 'CTRL': 'key-gray', 'SPACE': 'key-gray',
 };
 
-// LIBELLÉS SPÉCIAUX
 const SPECIAL_LABELS = {
-  'Esc': 'Esc',
-  'TAB': 'Tab',
-  'CAPS LOCK': 'Caps',
-  'SHIFT': '⇧',
-  'CTRL': 'Ctrl',
-  'SPACE': '␣',
-  'ENTER': '↵',
-  'CLR': 'CLR',
-  'DEL': '⌫',
+  'Esc': 'Esc', 'TAB': 'Tab', 'CAPS LOCK': 'Caps',
+  'SHIFT': '⇧', 'CTRL': 'Ctrl', 'SPACE': '␣',
+  'ENTER': '↵', 'CLR': 'CLR', 'DEL': '⌫',
+  'COPY': 'Copy',
 };
 
 const WIDE_KEYS = ['Esc', 'TAB', 'CAPS LOCK', 'SHIFT', 'CTRL', 'ENTER', 'CLR', 'DEL'];
@@ -67,6 +59,7 @@ function Keyboard({ onKeyPress }) {
       if (key === ' ') mapped = 'SPACE';
       if (key === 'Control') mapped = 'CTRL';
       if (key === 'Shift') mapped = 'SHIFT';
+      if (key.startsWith('Arrow')) mapped = key;
       console.log('[FRONT] Touche physique:', key, '→', mapped);
       if (onKeyPress) onKeyPress(mapped);
     };
@@ -109,10 +102,10 @@ function Keyboard({ onKeyPress }) {
                 {row.map((key) => (
                   <button
                     key={key}
-                    className={`key ${key === 'ENTER' ? 'key-green' : 'key-gray'}`}
+                    className={`key ${key === 'COPY' ? 'key-green' : 'key-gray'}`}
                     onClick={() => handleClick(key)}
                   >
-                    {key}
+                    {SPECIAL_LABELS[key] || key}
                   </button>
                 ))}
               </div>
