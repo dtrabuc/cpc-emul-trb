@@ -1,85 +1,117 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-const API_BASE = '/api';
+const WS_URL = 'ws://localhost:8000/ws/emulator/';
 
 export function useEmulator() {
   const [screen, setScreen] = useState({
     chars: [],
     colors: [],
-    cursor_x: 5,    // Position par défaut du curseur après "Ready"
-    cursor_y: 8,     // Ligne après "Ready"
+    cursor_x: 5,
+    cursor_y: 8,
     width: 80,
     height: 40,
     mode: 1,
   });
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('idle'); // idle | connecting | connected | error
   const [error, setError] = useState(null);
-  const intervalRef = useRef(null);
-  const firstFetchDone = useRef(false);
+  const wsRef = useRef(null);
+  const reconnectTimeout = useRef(null);
 
-  const fetchScreen = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE}/state/`);
-      if (!response.ok) throw new Error('Erreur réseau');
-      const data = await response.json();
+  const connect = useCallback(() => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      return;
+    }
 
-      // Si le backend renvoie des données, on les utilise
-      if (data.chars && data.chars.length > 0) {
-        setScreen({
-          chars: data.chars || [],
-          colors: data.colors || [],
-          cursor_x: data.cursor_x || 0,
-          cursor_y: data.cursor_y || 0,
-          width: data.width || 80,
-          height: data.height || 40,
-          mode: data.mode || 1,
-        });
-        setError(null);
+    setStatus('connecting');
+    const ws = new WebSocket(WS_URL);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('[WS] Connecté au backend');
+      setStatus('connected');
+      setError(null);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'screen') {
+          const screenData = data.data;
+          setScreen({
+            chars: screenData.chars || [],
+            colors: screenData.colors || [],
+            cursor_x: screenData.cursor_x || 0,
+            cursor_y: screenData.cursor_y || 0,
+            width: screenData.width || 80,
+            height: screenData.height || 40,
+            mode: screenData.mode || 1,
+          });
+        }
+      } catch (e) {
+        console.error('[WS] Erreur de parsing:', e);
       }
-      // Sinon, on garde l'écran de démarrage
-      setLoading(false);
-      firstFetchDone.current = true;
-    } catch (err) {
-      setError('Erreur de connexion au backend');
-      console.error(err);
-      setLoading(false);
+    };
+
+    ws.onclose = () => {
+      console.log('[WS] Déconnecté');
+      setStatus('error');
+      // Reconnexion automatique après 2s
+      reconnectTimeout.current = setTimeout(() => {
+        connect();
+      }, 2000);
+    };
+
+    ws.onerror = (err) => {
+      console.error('[WS] Erreur:', err);
+      setError('Erreur de connexion WebSocket');
+    };
+  }, []);
+
+  const disconnect = useCallback(() => {
+    if (reconnectTimeout.current) {
+      clearTimeout(reconnectTimeout.current);
+      reconnectTimeout.current = null;
+    }
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    setStatus('idle');
+  }, []);
+
+  const sendKey = useCallback((key) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'key',
+        key: key,
+      }));
+    } else {
+      console.warn('[WS] Non connecté, impossible d\'envoyer la touche:', key);
     }
   }, []);
 
-  const sendKey = useCallback(async (key) => {
-    try {
-      await fetch(`${API_BASE}/key/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key }),
-      });
-      // Après l'envoi d'une touche, on rafraîchit l'écran
-      await fetchScreen();
-    } catch (err) {
-      console.error('Erreur clavier:', err);
+  const reset = useCallback(() => {
+    // On envoie une commande de reset via WebSocket
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'reset',
+      }));
     }
-  }, [fetchScreen]);
-
-  const reset = useCallback(async () => {
-    try {
-      await fetch(`${API_BASE}/reset/`, { method: 'POST' });
-      await fetchScreen();
-    } catch (err) {
-      console.error('Erreur reset:', err);
-    }
-  }, [fetchScreen]);
+  }, []);
 
   useEffect(() => {
-    fetchScreen();
-    intervalRef.current = setInterval(fetchScreen, 50);
-    return () => clearInterval(intervalRef.current);
-  }, [fetchScreen]);
+    connect();
+    return () => {
+      disconnect();
+    };
+  }, [connect, disconnect]);
 
   return {
     screen,
-    loading,
+    status,
     error,
     sendKey,
     reset,
+    isConnected: status === 'connected',
   };
 }

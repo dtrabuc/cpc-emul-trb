@@ -7,7 +7,7 @@ import StatusBar from './components/StatusBar/StatusBar';
 import './App.css';
 
 function App() {
-  const { screen, loading, error, sendKey, reset } = useEmulator();
+  const { screen, status, error, sendKey, reset, isConnected } = useEmulator();
 
   const handleFileLoad = (file) => {
     console.log('Fichier chargé:', file.name);
@@ -23,11 +23,16 @@ function App() {
         width={screen.width}
         height={screen.height}
         mode={screen.mode}
-        loading={loading}
+        loading={status === 'connecting' || status === 'idle'}
       />
       <Keyboard onKeyPress={sendKey} />
       <Cassette onFileLoad={handleFileLoad} />
-      <StatusBar loading={loading} error={error} onReset={reset} />
+      <StatusBar
+        loading={status === 'connecting'}
+        error={error || (status === 'error' ? 'Connexion perdue' : null)}
+        onReset={reset}
+        isConnected={isConnected}
+      />
     </div>
   );
 }
