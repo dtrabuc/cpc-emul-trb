@@ -1,3 +1,4 @@
+// src/hooks/useEmulator.js
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const WS_URL = 'ws://localhost:8000/ws/emulator/';

@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState } from 'react';
 import { useEmulator } from './hooks/useEmulator';
 import Screen from './components/Screen/Screen';

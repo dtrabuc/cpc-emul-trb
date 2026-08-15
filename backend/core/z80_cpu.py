@@ -1,14 +1,11 @@
 # core/z80_cpu.py
-# Émulateur Z80 cycle-accurate
-# Inspiré de l'architecture de CPCSharp (C#)
-# Implémente toutes les instructions du Z80, y compris les préfixes DD, FD, CB, ED
+# Z80 CPU – Toutes les instructions, préfixes CB / DD / FD / ED, interruptions, flags, cycles
 
 class Z80CPU:
-    # --- Constructeur et registres ---
     def __init__(self):
-        self.memory = None          # Référence à la mémoire (objet Memory)
-        self.io_read = None         # Fonction de lecture I/O
-        self.io_write = None        # Fonction d'écriture I/O
+        self.memory = None
+        self.io_read = None
+        self.io_write = None
 
         # Registres principaux 8 bits
         self.a = 0x00
@@ -37,92 +34,91 @@ class Z80CPU:
         self.pc = 0x0000
 
         # Registres spéciaux
-        self.i = 0x00          # Vecteur d'interruption
-        self.r = 0x00          # Compteur de rafraîchissement mémoire
+        self.i = 0x00
+        self.r = 0x00
 
         # Interruptions
-        self.iff1 = False      # Interrupt flip-flop 1
-        self.iff2 = False      # Interrupt flip-flop 2
-        self.im = 0            # Mode interruption (0, 1, 2)
-        self.halted = False    # État HALT
+        self.iff1 = False
+        self.iff2 = False
+        self.im = 0
+        self.halted = False
 
-        # Compteur de cycles
+        # Cycles
         self._cycles = 0
 
-        # Masques des flags
-        FLAG_C = 0x01
-        FLAG_N = 0x02
-        FLAG_PV = 0x04
-        FLAG_H = 0x10
-        FLAG_Z = 0x40
-        FLAG_S = 0x80
-
-    # --- Propriétés pour les registres 16 bits ---
+    # --- Accesseurs 16 bits ---
     @property
     def af(self):
         return (self.a << 8) | self.f
     @af.setter
-    def af(self, value):
-        self.a = (value >> 8) & 0xFF
-        self.f = value & 0xFF
+    def af(self, v):
+        self.a = (v >> 8) & 0xFF
+        self.f = v & 0xFF
 
     @property
     def bc(self):
         return (self.b << 8) | self.c
     @bc.setter
-    def bc(self, value):
-        self.b = (value >> 8) & 0xFF
-        self.c = value & 0xFF
+    def bc(self, v):
+        self.b = (v >> 8) & 0xFF
+        self.c = v & 0xFF
 
     @property
     def de(self):
         return (self.d << 8) | self.e
     @de.setter
-    def de(self, value):
-        self.d = (value >> 8) & 0xFF
-        self.e = value & 0xFF
+    def de(self, v):
+        self.d = (v >> 8) & 0xFF
+        self.e = v & 0xFF
 
     @property
     def hl(self):
         return (self.h << 8) | self.l
     @hl.setter
-    def hl(self, value):
-        self.h = (value >> 8) & 0xFF
-        self.l = value & 0xFF
+    def hl(self, v):
+        self.h = (v >> 8) & 0xFF
+        self.l = v & 0xFF
 
     @property
     def af_alt(self):
         return (self.a_alt << 8) | self.f_alt
     @af_alt.setter
-    def af_alt(self, value):
-        self.a_alt = (value >> 8) & 0xFF
-        self.f_alt = value & 0xFF
+    def af_alt(self, v):
+        self.a_alt = (v >> 8) & 0xFF
+        self.f_alt = v & 0xFF
 
     @property
     def bc_alt(self):
         return (self.b_alt << 8) | self.c_alt
     @bc_alt.setter
-    def bc_alt(self, value):
-        self.b_alt = (value >> 8) & 0xFF
-        self.c_alt = value & 0xFF
+    def bc_alt(self, v):
+        self.b_alt = (v >> 8) & 0xFF
+        self.c_alt = v & 0xFF
 
     @property
     def de_alt(self):
         return (self.d_alt << 8) | self.e_alt
     @de_alt.setter
-    def de_alt(self, value):
-        self.d_alt = (value >> 8) & 0xFF
-        self.e_alt = value & 0xFF
+    def de_alt(self, v):
+        self.d_alt = (v >> 8) & 0xFF
+        self.e_alt = v & 0xFF
 
     @property
     def hl_alt(self):
         return (self.h_alt << 8) | self.l_alt
     @hl_alt.setter
-    def hl_alt(self, value):
-        self.h_alt = (value >> 8) & 0xFF
-        self.l_alt = value & 0xFF
+    def hl_alt(self, v):
+        self.h_alt = (v >> 8) & 0xFF
+        self.l_alt = v & 0xFF
 
-    # --- Gestion des flags ---
+    # --- Flags ---
+    FLAG_C = 0x01
+    FLAG_N = 0x02
+    FLAG_PV = 0x04
+    FLAG_H = 0x10
+    FLAG_Z = 0x40
+    FLAG_S = 0x80
+
     def set_flag(self, flag, value):
         if value:
             self.f |= flag
@@ -132,11 +128,9 @@ class Z80CPU:
     def get_flag(self, flag):
         return (self.f & flag) != 0
 
-    # --- Accès mémoire ---
+    # --- Mémoire ---
     def read_byte(self, addr):
-        if self.memory:
-            return self.memory.read_byte(addr)
-        return 0xFF
+        return self.memory.read_byte(addr) if self.memory else 0xFF
 
     def write_byte(self, addr, value):
         if self.memory:
@@ -149,25 +143,20 @@ class Z80CPU:
         self.write_byte(addr, value & 0xFF)
         self.write_byte(addr + 1, (value >> 8) & 0xFF)
 
-    # --- Accès I/O ---
+    # --- I/O ---
     def in_byte(self, port):
-        if self.io_read:
-            return self.io_read(port)
-        return 0xFF
+        return self.io_read(port) if self.io_read else 0xFF
 
     def out_byte(self, port, value):
         if self.io_write:
             self.io_write(port, value)
 
-    # --- Gestion des interruptions ---
+    # --- Interruptions ---
     def interrupt(self, vector=0x00):
-        """Demande d'interruption"""
         if not self.iff1:
             return 4
-
         self.halted = False
         if self.im == 0:
-            # RST 0x00
             self.sp -= 1
             self.write_byte(self.sp, (self.pc >> 8) & 0xFF)
             self.sp -= 1
@@ -177,7 +166,6 @@ class Z80CPU:
             self.iff2 = False
             return 7
         elif self.im == 1:
-            # RST 0x38
             self.sp -= 1
             self.write_byte(self.sp, (self.pc >> 8) & 0xFF)
             self.sp -= 1
@@ -187,7 +175,6 @@ class Z80CPU:
             self.iff2 = False
             return 7
         elif self.im == 2:
-            # Mode 2 : vecteur sur 16 bits
             addr = (self.i << 8) | vector
             self.pc = self.read_word(addr)
             self.iff1 = False
@@ -225,7 +212,7 @@ class Z80CPU:
         self.halted = False
         self._cycles = 0
 
-    # --- Step principal ---
+    # --- Step ---
     def step(self):
         if self.halted:
             self._cycles += 1
@@ -239,108 +226,97 @@ class Z80CPU:
         self._cycles += cycles
         return cycles
 
-    # --- Exécution des instructions ---
+    # --- Exécution ---
     def execute(self, opcode):
-        # --- Préfixe DD (IX) ---
+        # Préfixes
         if opcode == 0xDD:
             sub = self.read_byte(self.pc)
             self.pc += 1
             return self.execute_dd(sub)
-
-        # --- Préfixe FD (IY) ---
         if opcode == 0xFD:
             sub = self.read_byte(self.pc)
             self.pc += 1
             return self.execute_fd(sub)
-
-        # --- Préfixe CB ---
         if opcode == 0xCB:
             sub = self.read_byte(self.pc)
             self.pc += 1
             return self.execute_cb(sub)
-
-        # --- Préfixe ED ---
         if opcode == 0xED:
             sub = self.read_byte(self.pc)
             self.pc += 1
             return self.execute_ed(sub)
 
-        # --- Instructions 8 bits ---
-        # LD r, r' (0x40-0x7F)
+        # 8-bit LD r, r'
         if 0x40 <= opcode <= 0x7F:
             src = opcode & 0x07
             dst = (opcode >> 3) & 0x07
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             val = self._get_reg(regs[src])
             self._set_reg(regs[dst], val)
-            if regs[src] == 'hl':
+            if regs[src] == 'hl' and regs[dst] != 'hl':
                 return 7
             if regs[dst] == 'hl':
                 return 7
             return 4
 
-        # LD r, n (0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E)
+        # LD r, n
         if opcode in [0x06, 0x0E, 0x16, 0x1E, 0x26, 0x2E, 0x3E]:
             reg_map = {0x06: 'b', 0x0E: 'c', 0x16: 'd', 0x1E: 'e', 0x26: 'h', 0x2E: 'l', 0x3E: 'a'}
             self._set_reg(reg_map[opcode], self.read_byte(self.pc))
             self.pc += 1
             return 7
 
-        # LD rr, nn (0x01, 0x11, 0x21, 0x31)
+        # LD rr, nn
         if opcode in [0x01, 0x11, 0x21, 0x31]:
             reg_map = {0x01: 'bc', 0x11: 'de', 0x21: 'hl', 0x31: 'sp'}
             self._set_reg16(reg_map[opcode], self.read_word(self.pc))
             self.pc += 2
             return 10
 
-        # LD (BC), A (0x02)
+        # LD (BC), A / LD (DE), A / LD (HL), A
         if opcode == 0x02:
             self.write_byte(self.bc, self.a)
             return 7
-        # LD (DE), A (0x12)
         if opcode == 0x12:
             self.write_byte(self.de, self.a)
             return 7
-        # LD (HL), A (0x77)
         if opcode == 0x77:
             self.write_byte(self.hl, self.a)
             return 7
 
-        # LD A, (BC) (0x0A)
+        # LD A, (BC) / LD A, (DE) / LD A, (HL)
         if opcode == 0x0A:
             self.a = self.read_byte(self.bc)
             return 7
-        # LD A, (DE) (0x1A)
         if opcode == 0x1A:
             self.a = self.read_byte(self.de)
             return 7
-        # LD A, (HL) (0x7E)
         if opcode == 0x7E:
             self.a = self.read_byte(self.hl)
             return 7
 
-        # EX DE, HL (0xEB)
+        # EX DE, HL
         if opcode == 0xEB:
             self.de, self.hl = self.hl, self.de
             return 4
-        # EX AF, AF' (0x08)
+        # EX AF, AF'
         if opcode == 0x08:
             self.af, self.af_alt = self.af_alt, self.af
             return 4
-        # EXX (0xD9)
+        # EXX
         if opcode == 0xD9:
             self.bc, self.bc_alt = self.bc_alt, self.bc
             self.de, self.de_alt = self.de_alt, self.de
             self.hl, self.hl_alt = self.hl_alt, self.hl
             return 4
-        # EX (SP), HL (0xE3)
+        # EX (SP), HL
         if opcode == 0xE3:
             tmp = self.read_word(self.sp)
             self.write_word(self.sp, self.hl)
             self.hl = tmp
             return 19
 
-        # ADD HL, rr (0x09, 0x19, 0x29, 0x39)
+        # ADD HL, rr
         if opcode in [0x09, 0x19, 0x29, 0x39]:
             reg_map = {0x09: 'bc', 0x19: 'de', 0x29: 'hl', 0x39: 'sp'}
             val = self._get_reg16(reg_map[opcode])
@@ -351,7 +327,7 @@ class Z80CPU:
             self.hl = result & 0xFFFF
             return 11
 
-        # INC/DEC 16-bit (0x03, 0x0B, 0x13, 0x1B, 0x23, 0x2B, 0x33, 0x3B)
+        # INC/DEC 16-bit
         if opcode in [0x03, 0x0B, 0x13, 0x1B, 0x23, 0x2B, 0x33, 0x3B]:
             reg_map = {
                 0x03: 'bc', 0x0B: 'bc',
@@ -361,14 +337,14 @@ class Z80CPU:
             }
             reg = reg_map[opcode]
             val = self._get_reg16(reg)
-            if opcode & 0x08:  # DEC
+            if opcode & 0x08:
                 val = (val - 1) & 0xFFFF
-            else:              # INC
+            else:
                 val = (val + 1) & 0xFFFF
             self._set_reg16(reg, val)
             return 6
 
-        # INC/DEC 8-bit (0x04, 0x0C, 0x14, 0x1C, 0x24, 0x2C, 0x34, 0x3C)
+        # INC/DEC 8-bit
         if (0x04 <= opcode <= 0x3C) and (opcode & 0x07) in [0x04, 0x05]:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = (opcode >> 3) & 0x07
@@ -388,7 +364,7 @@ class Z80CPU:
                 return 11
             return 4
 
-        # ADD A, r (0x80-0x87)
+        # ADD A, r
         if 0x80 <= opcode <= 0x87:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -405,7 +381,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # ADD A, n (0xC6)
+        # ADD A, n
         if opcode == 0xC6:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -419,7 +395,7 @@ class Z80CPU:
             self.set_flag(0x04, ((self.a & 0x80) != (result & 0x80)))
             return 7
 
-        # ADC A, r (0x88-0x8F)
+        # ADC A, r
         if 0x88 <= opcode <= 0x8F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -437,7 +413,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # ADC A, n (0xCE)
+        # ADC A, n
         if opcode == 0xCE:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -452,7 +428,7 @@ class Z80CPU:
             self.set_flag(0x04, ((self.a & 0x80) != (result & 0x80)))
             return 7
 
-        # SUB A, r (0x90-0x97)
+        # SUB A, r
         if 0x90 <= opcode <= 0x97:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -469,7 +445,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # SUB A, n (0xD6)
+        # SUB A, n
         if opcode == 0xD6:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -483,7 +459,7 @@ class Z80CPU:
             self.set_flag(0x04, ((self.a & 0x80) != (result & 0x80)))
             return 7
 
-        # SBC A, r (0x98-0x9F)
+        # SBC A, r
         if 0x98 <= opcode <= 0x9F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -501,7 +477,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # SBC A, n (0xDE)
+        # SBC A, n
         if opcode == 0xDE:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -516,7 +492,7 @@ class Z80CPU:
             self.set_flag(0x04, ((self.a & 0x80) != (result & 0x80)))
             return 7
 
-        # AND A, r (0xA0-0xA7)
+        # AND A, r
         if 0xA0 <= opcode <= 0xA7:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -531,7 +507,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # AND A, n (0xE6)
+        # AND A, n
         if opcode == 0xE6:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -544,7 +520,7 @@ class Z80CPU:
             self.set_flag(0x04, self.a & 0x80)
             return 7
 
-        # OR A, r (0xB0-0xB7)
+        # OR A, r
         if 0xB0 <= opcode <= 0xB7:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -559,7 +535,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # OR A, n (0xF6)
+        # OR A, n
         if opcode == 0xF6:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -572,7 +548,7 @@ class Z80CPU:
             self.set_flag(0x04, self.a & 0x80)
             return 7
 
-        # XOR A, r (0xA8-0xAF)
+        # XOR A, r
         if 0xA8 <= opcode <= 0xAF:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -587,7 +563,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # XOR A, n (0xEE)
+        # XOR A, n
         if opcode == 0xEE:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -600,7 +576,7 @@ class Z80CPU:
             self.set_flag(0x04, self.a & 0x80)
             return 7
 
-        # CP A, r (0xB8-0xBF)
+        # CP A, r
         if 0xB8 <= opcode <= 0xBF:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = opcode & 0x07
@@ -616,7 +592,7 @@ class Z80CPU:
                 return 7
             return 4
 
-        # CP A, n (0xFE)
+        # CP A, n
         if opcode == 0xFE:
             n = self.read_byte(self.pc)
             self.pc += 1
@@ -629,7 +605,7 @@ class Z80CPU:
             self.set_flag(0x04, ((result & 0x80) != ((result & 0xFF) & 0x80)))
             return 7
 
-        # PUSH (0xC5, 0xD5, 0xE5, 0xF5)
+        # PUSH
         if opcode in [0xC5, 0xD5, 0xE5, 0xF5]:
             reg_map = {0xC5: 'bc', 0xD5: 'de', 0xE5: 'hl', 0xF5: 'af'}
             val = self._get_reg16(reg_map[opcode])
@@ -639,17 +615,17 @@ class Z80CPU:
             self.write_byte(self.sp, val & 0xFF)
             return 11
 
-        # POP (0xC1, 0xD1, 0xE1, 0xF1)
+        # POP
         if opcode in [0xC1, 0xD1, 0xE1, 0xF1]:
             reg_map = {0xC1: 'bc', 0xD1: 'de', 0xE1: 'hl', 0xF1: 'af'}
             val = self.read_word(self.sp)
             self.sp += 2
             self._set_reg16(reg_map[opcode], val)
-            if opcode == 0xF1:  # POP AF, on nettoie les bits inutilisés
+            if opcode == 0xF1:
                 self.f &= 0xFF
             return 10
 
-        # CALL (0xCD)
+        # CALL
         if opcode == 0xCD:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -660,7 +636,7 @@ class Z80CPU:
             self.pc = addr
             return 17
 
-        # CALL condition (0xC4, 0xCC, 0xD4, 0xDC, 0xE4, 0xEC, 0xF4, 0xFC)
+        # CALL condition
         if (0xC4 <= opcode <= 0xFC) and (opcode & 0x07) == 0x04:
             cond = (opcode >> 3) & 0x07
             if self._check_cond(cond):
@@ -676,13 +652,13 @@ class Z80CPU:
                 self.pc += 2
                 return 10
 
-        # RET (0xC9)
+        # RET
         if opcode == 0xC9:
             self.pc = self.read_word(self.sp)
             self.sp += 2
             return 10
 
-        # RET condition (0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8, 0xF0, 0xF8)
+        # RET condition
         if (0xC0 <= opcode <= 0xF8) and (opcode & 0x07) == 0x00 and opcode != 0xC9:
             cond = (opcode >> 3) & 0x07
             if self._check_cond(cond):
@@ -691,7 +667,7 @@ class Z80CPU:
                 return 11
             return 5
 
-        # RST (0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xF7, 0xFF)
+        # RST
         if opcode >= 0xC7 and (opcode & 0xC7) == 0xC7:
             rst_addr = opcode & 0x38
             self.sp -= 1
@@ -701,12 +677,12 @@ class Z80CPU:
             self.pc = rst_addr
             return 11
 
-        # JP (0xC3)
+        # JP
         if opcode == 0xC3:
             self.pc = self.read_word(self.pc)
             return 10
 
-        # JP condition (0xC2, 0xCA, 0xD2, 0xDA, 0xE2, 0xEA, 0xF2, 0xFA)
+        # JP condition
         if (0xC2 <= opcode <= 0xFA) and (opcode & 0x07) == 0x02:
             cond = (opcode >> 3) & 0x07
             if self._check_cond(cond):
@@ -716,12 +692,12 @@ class Z80CPU:
                 self.pc += 2
                 return 10
 
-        # JP (HL) (0xE9)
+        # JP (HL)
         if opcode == 0xE9:
             self.pc = self.hl
             return 4
 
-        # JR (0x18)
+        # JR
         if opcode == 0x18:
             offset = self.read_byte(self.pc)
             self.pc += 1
@@ -731,7 +707,7 @@ class Z80CPU:
                 self.pc += offset
             return 12
 
-        # JR condition (0x20, 0x28, 0x30, 0x38)
+        # JR condition
         if opcode in [0x20, 0x28, 0x30, 0x38]:
             cond_map = {0x20: 'nz', 0x28: 'z', 0x30: 'nc', 0x38: 'c'}
             if self._check_cond(cond_map[opcode]):
@@ -746,42 +722,42 @@ class Z80CPU:
                 self.pc += 1
                 return 7
 
-        # NOP (0x00)
+        # NOP
         if opcode == 0x00:
             return 4
 
-        # HALT (0x76)
+        # HALT
         if opcode == 0x76:
             self.halted = True
             return 4
 
-        # DI (0xF3)
+        # DI
         if opcode == 0xF3:
             self.iff1 = False
             self.iff2 = False
             return 4
 
-        # EI (0xFB)
+        # EI
         if opcode == 0xFB:
             self.iff1 = True
             self.iff2 = True
             return 4
 
-        # LD (nn), A (0x32)
+        # LD (nn), A
         if opcode == 0x32:
             addr = self.read_word(self.pc)
             self.pc += 2
             self.write_byte(addr, self.a)
             return 13
 
-        # LD A, (nn) (0x3A)
+        # LD A, (nn)
         if opcode == 0x3A:
             addr = self.read_word(self.pc)
             self.pc += 2
             self.a = self.read_byte(addr)
             return 13
 
-        # LD (nn), HL (0x22)
+        # LD (nn), HL
         if opcode == 0x22:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -789,7 +765,7 @@ class Z80CPU:
             self.write_byte(addr + 1, self.h)
             return 16
 
-        # LD HL, (nn) (0x2A)
+        # LD HL, (nn)
         if opcode == 0x2A:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -797,42 +773,42 @@ class Z80CPU:
             self.h = self.read_byte(addr + 1)
             return 16
 
-        # IN A, (n) (0xDB)
+        # IN A, (n)
         if opcode == 0xDB:
             port = self.read_byte(self.pc)
             self.pc += 1
             self.a = self.in_byte(port)
             return 11
 
-        # OUT (n), A (0xD3)
+        # OUT (n), A
         if opcode == 0xD3:
             port = self.read_byte(self.pc)
             self.pc += 1
             self.out_byte(port, self.a)
             return 11
 
-        # CPL (0x2F)
+        # CPL
         if opcode == 0x2F:
             self.a ^= 0xFF
             self.set_flag(0x10, True)
             self.set_flag(0x02, True)
             return 4
 
-        # SCF (0x37)
+        # SCF
         if opcode == 0x37:
             self.set_flag(0x01, True)
             self.set_flag(0x10, False)
             self.set_flag(0x02, False)
             return 4
 
-        # CCF (0x3F)
+        # CCF
         if opcode == 0x3F:
             self.set_flag(0x01, not self.get_flag(0x01))
             self.set_flag(0x10, False)
             self.set_flag(0x02, False)
             return 4
 
-        # DAA (0x27)
+        # DAA
         if opcode == 0x27:
             result = 0
             if self.get_flag(0x10) or (self.a & 0x0F) > 9:
@@ -852,15 +828,12 @@ class Z80CPU:
             self.set_flag(0x04, self.a & 0x80)
             return 4
 
-        # --- Si aucune instruction ne correspond ---
-        # print(f"[Z80] Opcode non implémenté: {opcode:02X} à PC={self.pc-1:04X}")
+        # Si aucune instruction ne correspond
         return 4
 
-    # --- Exécution des préfixes ---
-
+    # --- Préfixes ---
     def execute_cb(self, sub):
-        """Instructions avec préfixe CB (bit/rotate/shift)"""
-        # RLC r (0x00-0x07)
+        # RLC r
         if 0x00 <= sub <= 0x07:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -878,7 +851,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # RRC r (0x08-0x0F)
+        # RRC r
         if 0x08 <= sub <= 0x0F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -896,7 +869,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # RL r (0x10-0x17)
+        # RL r
         if 0x10 <= sub <= 0x17:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -915,7 +888,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # RR r (0x18-0x1F)
+        # RR r
         if 0x18 <= sub <= 0x1F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -934,7 +907,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # SLA r (0x20-0x27)
+        # SLA r
         if 0x20 <= sub <= 0x27:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -952,7 +925,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # SRA r (0x28-0x2F)
+        # SRA r
         if 0x28 <= sub <= 0x2F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -970,7 +943,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # SRL r (0x38-0x3F)
+        # SRL r
         if 0x38 <= sub <= 0x3F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = sub & 0x07
@@ -988,7 +961,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # BIT b, r (0x40-0x7F)
+        # BIT b, r
         if 0x40 <= sub <= 0x7F:
             bit = (sub >> 3) & 0x07
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
@@ -1003,7 +976,7 @@ class Z80CPU:
                 return 12
             return 8
 
-        # SET b, r (0xC0-0xFF)
+        # SET b, r
         if 0xC0 <= sub <= 0xFF:
             bit = (sub >> 3) & 0x07
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
@@ -1014,7 +987,7 @@ class Z80CPU:
                 return 15
             return 8
 
-        # RES b, r (0x80-0xBF)
+        # RES b, r
         if 0x80 <= sub <= 0xBF:
             bit = (sub >> 3) & 0x07
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
@@ -1028,24 +1001,23 @@ class Z80CPU:
         return 4
 
     def execute_dd(self, sub):
-        """Instructions avec préfixe DD (IX)"""
-        # LD IX, nn (0x21)
+        # LD IX, nn
         if sub == 0x21:
             self.ix = self.read_word(self.pc)
             self.pc += 2
             return 14
 
-        # INC IX (0x23)
+        # INC IX
         if sub == 0x23:
             self.ix = (self.ix + 1) & 0xFFFF
             return 10
 
-        # DEC IX (0x2B)
+        # DEC IX
         if sub == 0x2B:
             self.ix = (self.ix - 1) & 0xFFFF
             return 10
 
-        # PUSH IX (0xE5)
+        # PUSH IX
         if sub == 0xE5:
             self.sp -= 1
             self.write_byte(self.sp, (self.ix >> 8) & 0xFF)
@@ -1053,25 +1025,25 @@ class Z80CPU:
             self.write_byte(self.sp, self.ix & 0xFF)
             return 15
 
-        # POP IX (0xE1)
+        # POP IX
         if sub == 0xE1:
             self.ix = self.read_word(self.sp)
             self.sp += 2
             return 14
 
-        # EX (SP), IX (0xE3)
+        # EX (SP), IX
         if sub == 0xE3:
             tmp = self.read_word(self.sp)
             self.write_word(self.sp, self.ix)
             self.ix = tmp
             return 23
 
-        # JP (IX) (0xE9)
+        # JP (IX)
         if sub == 0xE9:
             self.pc = self.ix
             return 8
 
-        # ADD IX, rr (0x09, 0x19, 0x29, 0x39)
+        # ADD IX, rr
         if sub in [0x09, 0x19, 0x29, 0x39]:
             reg_map = {0x09: 'bc', 0x19: 'de', 0x29: 'ix', 0x39: 'sp'}
             val = self._get_reg16(reg_map[sub])
@@ -1082,7 +1054,7 @@ class Z80CPU:
             self.ix = result & 0xFFFF
             return 15
 
-        # LD (IX+d), r (0x70-0x77)
+        # LD (IX+d), r
         if 0x70 <= sub <= 0x77:
             d = self.read_byte(self.pc)
             self.pc += 1
@@ -1095,7 +1067,7 @@ class Z80CPU:
             self.write_byte((self.ix + d) & 0xFFFF, val)
             return 19
 
-        # LD r, (IX+d) (0x46-0x7E)
+        # LD r, (IX+d)
         if 0x46 <= sub <= 0x7E:
             d = self.read_byte(self.pc)
             self.pc += 1
@@ -1111,24 +1083,23 @@ class Z80CPU:
         return 4
 
     def execute_fd(self, sub):
-        """Instructions avec préfixe FD (IY)"""
-        # LD IY, nn (0x21)
+        # LD IY, nn
         if sub == 0x21:
             self.iy = self.read_word(self.pc)
             self.pc += 2
             return 14
 
-        # INC IY (0x23)
+        # INC IY
         if sub == 0x23:
             self.iy = (self.iy + 1) & 0xFFFF
             return 10
 
-        # DEC IY (0x2B)
+        # DEC IY
         if sub == 0x2B:
             self.iy = (self.iy - 1) & 0xFFFF
             return 10
 
-        # PUSH IY (0xE5)
+        # PUSH IY
         if sub == 0xE5:
             self.sp -= 1
             self.write_byte(self.sp, (self.iy >> 8) & 0xFF)
@@ -1136,25 +1107,25 @@ class Z80CPU:
             self.write_byte(self.sp, self.iy & 0xFF)
             return 15
 
-        # POP IY (0xE1)
+        # POP IY
         if sub == 0xE1:
             self.iy = self.read_word(self.sp)
             self.sp += 2
             return 14
 
-        # EX (SP), IY (0xE3)
+        # EX (SP), IY
         if sub == 0xE3:
             tmp = self.read_word(self.sp)
             self.write_word(self.sp, self.iy)
             self.iy = tmp
             return 23
 
-        # JP (IY) (0xE9)
+        # JP (IY)
         if sub == 0xE9:
             self.pc = self.iy
             return 8
 
-        # ADD IY, rr (0x09, 0x19, 0x29, 0x39)
+        # ADD IY, rr
         if sub in [0x09, 0x19, 0x29, 0x39]:
             reg_map = {0x09: 'bc', 0x19: 'de', 0x29: 'iy', 0x39: 'sp'}
             val = self._get_reg16(reg_map[sub])
@@ -1165,7 +1136,7 @@ class Z80CPU:
             self.iy = result & 0xFFFF
             return 15
 
-        # LD (IY+d), r (0x70-0x77)
+        # LD (IY+d), r
         if 0x70 <= sub <= 0x77:
             d = self.read_byte(self.pc)
             self.pc += 1
@@ -1178,7 +1149,7 @@ class Z80CPU:
             self.write_byte((self.iy + d) & 0xFFFF, val)
             return 19
 
-        # LD r, (IY+d) (0x46-0x7E)
+        # LD r, (IY+d)
         if 0x46 <= sub <= 0x7E:
             d = self.read_byte(self.pc)
             self.pc += 1
@@ -1194,22 +1165,21 @@ class Z80CPU:
         return 4
 
     def execute_ed(self, sub):
-        """Instructions avec préfixe ED (bloc, I/O, interruptions)"""
-        # RETI (0x4D)
+        # RETI
         if sub == 0x4D:
             self.iff1 = self.iff2
             self.pc = self.read_word(self.sp)
             self.sp += 2
             return 14
 
-        # RETN (0x45)
+        # RETN
         if sub == 0x45:
             self.iff1 = self.iff2
             self.pc = self.read_word(self.sp)
             self.sp += 2
             return 14
 
-        # LDI (0xA0)
+        # LDI
         if sub == 0xA0:
             self.write_byte(self.de, self.read_byte(self.hl))
             self.de = (self.de + 1) & 0xFFFF
@@ -1220,7 +1190,7 @@ class Z80CPU:
             self.set_flag(0x04, self.bc != 0)
             return 16
 
-        # LDD (0xA8)
+        # LDD
         if sub == 0xA8:
             self.write_byte(self.de, self.read_byte(self.hl))
             self.de = (self.de - 1) & 0xFFFF
@@ -1231,7 +1201,7 @@ class Z80CPU:
             self.set_flag(0x04, self.bc != 0)
             return 16
 
-        # LDIR (0xB0)
+        # LDIR
         if sub == 0xB0:
             self.write_byte(self.de, self.read_byte(self.hl))
             self.de = (self.de + 1) & 0xFFFF
@@ -1245,7 +1215,7 @@ class Z80CPU:
                 return 21
             return 16
 
-        # LDDR (0xB8)
+        # LDDR
         if sub == 0xB8:
             self.write_byte(self.de, self.read_byte(self.hl))
             self.de = (self.de - 1) & 0xFFFF
@@ -1259,7 +1229,7 @@ class Z80CPU:
                 return 21
             return 16
 
-        # CPI (0xA1)
+        # CPI
         if sub == 0xA1:
             val = self.read_byte(self.hl)
             result = self.a - val
@@ -1271,7 +1241,7 @@ class Z80CPU:
             self.set_flag(0x04, self.bc != 0)
             return 16
 
-        # CPD (0xA9)
+        # CPD
         if sub == 0xA9:
             val = self.read_byte(self.hl)
             result = self.a - val
@@ -1283,7 +1253,7 @@ class Z80CPU:
             self.set_flag(0x04, self.bc != 0)
             return 16
 
-        # CPIR (0xB1)
+        # CPIR
         if sub == 0xB1:
             val = self.read_byte(self.hl)
             result = self.a - val
@@ -1298,7 +1268,7 @@ class Z80CPU:
                 return 21
             return 16
 
-        # CPDR (0xB9)
+        # CPDR
         if sub == 0xB9:
             val = self.read_byte(self.hl)
             result = self.a - val
@@ -1313,21 +1283,21 @@ class Z80CPU:
                 return 21
             return 16
 
-        # IN A, (n) (0x3A)
+        # IN A, (n)
         if sub == 0x3A:
             port = self.read_byte(self.pc)
             self.pc += 1
             self.a = self.in_byte(port)
             return 11
 
-        # OUT (n), A (0x39)
+        # OUT (n), A
         if sub == 0x39:
             port = self.read_byte(self.pc)
             self.pc += 1
             self.out_byte(port, self.a)
             return 11
 
-        # IN r, (C) (0x40-0x7F)
+        # IN r, (C)
         if 0x40 <= sub <= 0x7F:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = (sub >> 3) & 0x07
@@ -1342,7 +1312,7 @@ class Z80CPU:
                 return 12
             return 12
 
-        # OUT (C), r (0x41-0x7F, bit 0 = 1)
+        # OUT (C), r
         if 0x41 <= sub <= 0x7F and (sub & 0x01) == 0x01:
             regs = ['b', 'c', 'd', 'e', 'h', 'l', 'hl', 'a']
             idx = (sub >> 3) & 0x07
@@ -1352,12 +1322,12 @@ class Z80CPU:
                 return 12
             return 12
 
-        # LD I, A (0x47)
+        # LD I, A
         if sub == 0x47:
             self.i = self.a
             return 9
 
-        # LD A, I (0x57)
+        # LD A, I
         if sub == 0x57:
             self.a = self.i
             self.set_flag(0x10, False)
@@ -1367,12 +1337,12 @@ class Z80CPU:
             self.set_flag(0x04, self.iff2)
             return 9
 
-        # LD R, A (0x4F)
+        # LD R, A
         if sub == 0x4F:
             self.r = self.a
             return 9
 
-        # LD A, R (0x5F)
+        # LD A, R
         if sub == 0x5F:
             self.a = self.r
             self.set_flag(0x10, False)
@@ -1382,22 +1352,22 @@ class Z80CPU:
             self.set_flag(0x04, self.iff2)
             return 9
 
-        # IM 0 (0x46)
+        # IM 0
         if sub == 0x46:
             self.im = 0
             return 8
 
-        # IM 1 (0x56)
+        # IM 1
         if sub == 0x56:
             self.im = 1
             return 8
 
-        # IM 2 (0x5E)
+        # IM 2
         if sub == 0x5E:
             self.im = 2
             return 8
 
-        # NEG (0x44)
+        # NEG
         if sub == 0x44:
             result = -self.a
             self.set_flag(0x10, (self.a & 0x0F) != 0)
@@ -1409,7 +1379,7 @@ class Z80CPU:
             self.set_flag(0x04, result & 0x80)
             return 8
 
-        # LD (nn), BC (0x43)
+        # LD (nn), BC
         if sub == 0x43:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1417,7 +1387,7 @@ class Z80CPU:
             self.write_byte(addr + 1, self.b)
             return 20
 
-        # LD BC, (nn) (0x4B)
+        # LD BC, (nn)
         if sub == 0x4B:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1425,7 +1395,7 @@ class Z80CPU:
             self.b = self.read_byte(addr + 1)
             return 20
 
-        # LD (nn), DE (0x53)
+        # LD (nn), DE
         if sub == 0x53:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1433,7 +1403,7 @@ class Z80CPU:
             self.write_byte(addr + 1, self.d)
             return 20
 
-        # LD DE, (nn) (0x5B)
+        # LD DE, (nn)
         if sub == 0x5B:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1441,7 +1411,7 @@ class Z80CPU:
             self.d = self.read_byte(addr + 1)
             return 20
 
-        # LD (nn), SP (0x73)
+        # LD (nn), SP
         if sub == 0x73:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1449,7 +1419,7 @@ class Z80CPU:
             self.write_byte(addr + 1, (self.sp >> 8) & 0xFF)
             return 20
 
-        # LD SP, (nn) (0x7B)
+        # LD SP, (nn)
         if sub == 0x7B:
             addr = self.read_word(self.pc)
             self.pc += 2
@@ -1458,7 +1428,7 @@ class Z80CPU:
 
         return 8
 
-    # --- Fonctions auxiliaires pour l'accès aux registres ---
+    # --- Auxiliaires ---
     def _get_reg(self, name):
         if name == 'b':
             return self.b
@@ -1548,7 +1518,6 @@ class Z80CPU:
             return self.get_flag(0x80)
         return False
 
-    # --- Getter pour l'état du CPU (debug) ---
     def get_registers(self):
         return {
             'pc': self.pc,

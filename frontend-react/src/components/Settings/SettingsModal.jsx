@@ -1,3 +1,4 @@
+// src/components/Settings/SettingsModal.jsx
 import React, { useState } from 'react';
 import './SettingsModal.css';
 

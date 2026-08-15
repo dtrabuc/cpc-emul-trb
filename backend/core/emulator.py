@@ -1,3 +1,6 @@
+# core/emulator.py
+# Émulateur complet : CPU, mémoire, PPI, CRTC, GateArray, PSG
+
 from .z80_cpu import Z80CPU
 from .memory import Memory
 from .crtc import CRTC6845
@@ -10,9 +13,9 @@ class Emulator:
     def __init__(self):
         self.memory = Memory()
         self.crtc = CRTC6845()
-        self.gate_array = GateArray()
+        self.gate_array = GateArray(self.memory, self.crtc)
         self.psg = AY8912Wrapper()
-        self.ppi = PPI(self.crtc, self.psg)
+        self.ppi = PPI(self.crtc, self.psg, self.gate_array)
         self.cpu = Z80CPU()
         self.cpu.memory = self.memory
         self.cpu.io_read = self.io_read
@@ -24,24 +27,26 @@ class Emulator:
         self._cycle_event = threading.Event()
 
     def io_read(self, port):
-        if 0x7F00 <= port <= 0x7F0F:
-            return self.ppi.read(port & 0xF700)
+        # Ports PPI : 0xF400 à 0xF7FF
+        if 0xF400 <= port <= 0xF7FF:
+            return self.ppi.read(port)
         return 0xFF
 
     def io_write(self, port, value):
-        if 0x7F00 <= port <= 0x7F0F:
-            self.ppi.write(port & 0xF700, value)
+        if 0xF400 <= port <= 0xF7FF:
+            self.ppi.write(port, value)
 
     def reset(self):
         self.memory.reset()
         self.crtc.reset()
         self.gate_array.reset()
         self.psg.reset()
-        self.ppi = PPI(self.crtc, self.psg)
+        self.ppi.reset()
         self.cpu.reset()
         self.running = True
         self._pending_cycles = 0
 
+        # Charger les ROMs
         try:
             self.load_roms('roms/cpc464_fr.rom', 'roms/basic_1.0.rom')
         except FileNotFoundError:
