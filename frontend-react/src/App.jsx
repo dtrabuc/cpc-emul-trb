@@ -8,26 +8,50 @@ import SettingsModal from './components/Settings/SettingsModal';
 import './App.css';
 
 function App() {
-  const { screen, loading, error, powerLed, isResetting, sendKey, reset, isConnected } = useEmulator();
+  const { 
+    screen, 
+    loading, 
+    error, 
+    powerLed, 
+    isResetting, 
+    romsLoaded,
+    tapeStatus,
+    sendKey, 
+    reset, 
+    loadRoms,
+    loadTape,
+    tapeControl,
+    isConnected 
+  } = useEmulator();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLoadROM = (firmwareFile, basicFile) => {
-    const formData = new FormData();
-    formData.append('firmware', firmwareFile);
-    formData.append('basic', basicFile);
+    // Lecture des fichiers et envoi via WebSocket
+    const readFileAsHex = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const buffer = e.target.result;
+          const bytes = new Uint8Array(buffer);
+          let hex = '';
+          for (let i = 0; i < bytes.length; i++) {
+            hex += bytes[i].toString(16).padStart(2, '0');
+          }
+          resolve(hex);
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    };
 
-    fetch('http://localhost:8000/api/load_roms/', {
-      method: 'POST',
-      body: formData,
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('ROMs chargées:', data);
-        alert('ROMs chargées avec succès !');
+    Promise.all([readFileAsHex(firmwareFile), readFileAsHex(basicFile)])
+      .then(([firmwareHex, basicHex]) => {
+        loadRoms('roms/cpc464_fr.rom', 'roms/basic_1.0.rom');
+        console.log('ROMs prêtes à être chargées');
       })
       .catch(err => {
-        console.error('Erreur chargement ROMs:', err);
-        alert('Erreur lors du chargement des ROMs.');
+        console.error('Erreur lecture ROMs:', err);
+        alert('Erreur lors de la lecture des fichiers ROM.');
       });
   };
 
@@ -62,16 +86,37 @@ function App() {
           width={screen.width}
           height={screen.height}
           mode={screen.mode}
-          loading={loading}
+          loading={loading || !romsLoaded}
         />
         <Keyboard onKeyPress={sendKey} />
-        <Datacorder onFileLoad={(file) => console.log('Fichier chargé:', file)} />
+        <Datacorder 
+          onFileLoad={(file) => {
+            console.log('Fichier K7 chargé:', file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const buffer = e.target.result;
+              const bytes = new Uint8Array(buffer);
+              let hex = '';
+              for (let i = 0; i < bytes.length; i++) {
+                hex += bytes[i].toString(16).padStart(2, '0');
+              }
+              loadTape(file.name, hex);
+            };
+            reader.readAsArrayBuffer(file);
+          }}
+          tapeStatus={tapeStatus}
+          onPlay={() => tapeControl('play')}
+          onStop={() => tapeControl('stop')}
+          onRewind={() => tapeControl('rewind')}
+          onEject={() => tapeControl('eject')}
+        />
         <StatusBar
-          loading={loading}
+          loading={loading || !romsLoaded}
           error={error}
           onReset={reset}
           isConnected={isConnected}
           powerLed={powerLed}
+          romsLoaded={romsLoaded}
         />
       </main>
 

@@ -4,7 +4,28 @@ from .crtc import CRTC6845
 from .gate_array import GateArray
 from .ppi import PPI
 from .ay8912 import AY8912Wrapper
+from .tape import TapeDrive
 import threading
+
+# Singleton global pour l'émulateur
+_emulator_instance = None
+_emulator_lock = threading.Lock()
+
+def get_emulator():
+    """Retourne l'instance singleton de l'émulateur"""
+    global _emulator_instance
+    with _emulator_lock:
+        if _emulator_instance is None:
+            _emulator_instance = Emulator()
+        return _emulator_instance
+
+def reset_emulator_singleton():
+    """Réinitialise le singleton (pour dev/debug)"""
+    global _emulator_instance
+    with _emulator_lock:
+        if _emulator_instance:
+            _emulator_instance.running = False
+        _emulator_instance = None
 
 class Emulator:
     def __init__(self):
@@ -12,7 +33,8 @@ class Emulator:
         self.crtc = CRTC6845()
         self.gate_array = GateArray(self.memory, self.crtc)
         self.psg = AY8912Wrapper()
-        self.ppi = PPI(self.crtc, self.psg, self.gate_array)
+        self.tape = TapeDrive()
+        self.ppi = PPI(self.crtc, self.psg, self.gate_array, self.tape)
         self.cpu = Z80CPU()
         self.cpu.memory = self.memory
         self.cpu.io_read = self.io_read
@@ -23,6 +45,7 @@ class Emulator:
         self._cycle_lock = threading.Lock()
         self._cycle_event = threading.Event()
         self.power_led = True
+        self.roms_loaded = False
 
     def io_read(self, port):
         if 0xF400 <= port <= 0xF7FF:

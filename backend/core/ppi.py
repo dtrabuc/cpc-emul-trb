@@ -1,15 +1,17 @@
 from enum import Enum
 from .keyboard_state import KeyboardState
+from .tape import TapeDrive
 
 class IODirection(Enum):
     INPUT = 0
     OUTPUT = 1
 
 class PPI:
-    def __init__(self, crtc, psg, gate_array):
+    def __init__(self, crtc, psg, gate_array, tape: TapeDrive = None):
         self._crtc = crtc
         self._psg = psg
         self._gate_array = gate_array
+        self._tape = tape
         self._keyboard = KeyboardState()
         self._port_a = 0xFF
         self._port_b = 0xFF
@@ -71,6 +73,9 @@ class PPI:
 
         elif port_high == 0xF500:
             if self._port_b_direction == IODirection.INPUT:
+                # Lecture du signal cassette depuis le TapeDrive
+                if self._tape and self._tape.motor_on and self._tape.loaded:
+                    self._cas_in = (self._tape.read_bit() == 1)
                 cas_in = 0x80 if self._cas_in else 0x00
                 vsync = 0x01 if self._crtc.vsync else 0x00
                 return cas_in | 0x0E | (vsync << 4)
@@ -98,7 +103,11 @@ class PPI:
             keyboard_data = self._keyboard.read_row(row)
             if self._port_a_direction == IODirection.INPUT:
                 self._port_a = keyboard_data
+        
+        # Gestion du moteur cassette
         self._tape_motor_on = (value & 0x80) != 0
+        if self._tape:
+            self._tape.set_motor(self._tape_motor_on)
 
     def press_key(self, key: str) -> bool:
         if self._keyboard.press_azerty(key):
