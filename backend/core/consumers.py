@@ -1,4 +1,3 @@
-# core/consumers.py
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -47,4 +46,4 @@ class EmulatorConsumer(AsyncWebsocketConsumer):
                 "type": "screen",
                 "data": state
             }))
-            await asyncio.sleep(0.02)  # 50 FPS
+            await asyncio.sleep(0.02)

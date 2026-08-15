@@ -20,10 +20,7 @@
   gap: 10px;
 }
 
-.datacorder-icon {
-  font-size: 28px;
-}
-
+.datacorder-icon { font-size: 28px; }
 .datacorder-title {
   color: #8888bb;
   font-family: "Courier New", monospace;
@@ -124,32 +121,14 @@
   border-color: #4a4a7a;
 }
 
-.datacorder-btn:active {
-  transform: scale(0.92);
-}
-
-.datacorder-btn.rec {
-  color: #ff3333;
-}
-.datacorder-btn.play {
-  color: #44ff44;
-}
-.datacorder-btn.play.active {
-  background: #1a3a1a;
-  border-color: #44ff44;
-}
-.datacorder-btn.stop {
-  color: #ff6644;
-}
-.datacorder-btn.pause {
-  color: #ffcc44;
-}
-.datacorder-btn.rewind {
-  color: #ffaa44;
-}
-.datacorder-btn.eject {
-  color: #44ccff;
-}
+.datacorder-btn:active { transform: scale(0.92); }
+.datacorder-btn.rec { color: #ff3333; }
+.datacorder-btn.play { color: #44ff44; }
+.datacorder-btn.play.active { background: #1a3a1a; border-color: #44ff44; }
+.datacorder-btn.stop { color: #ff6644; }
+.datacorder-btn.pause { color: #ffcc44; }
+.datacorder-btn.rewind { color: #ffaa44; }
+.datacorder-btn.eject { color: #44ccff; }
 
 .datacorder-bottom {
   display: flex;
@@ -183,26 +162,10 @@
 }
 
 @media (max-width: 768px) {
-  .datacorder {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .datacorder-top {
-    justify-content: center;
-  }
-  .datacorder-body {
-    justify-content: center;
-  }
-  .datacorder-bottom {
-    justify-content: center;
-  }
-  .datacorder-window {
-    width: 80px;
-    height: 36px;
-  }
-  .datacorder-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
-  }
+  .datacorder { flex-direction: column; align-items: stretch; }
+  .datacorder-top { justify-content: center; }
+  .datacorder-body { justify-content: center; }
+  .datacorder-bottom { justify-content: center; }
+  .datacorder-window { width: 80px; height: 36px; }
+  .datacorder-btn { width: 28px; height: 28px; font-size: 13px; }
 }

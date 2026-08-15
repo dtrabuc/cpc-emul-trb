@@ -1,4 +1,3 @@
-// src/hooks/useEmulator.js
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const WS_URL = 'ws://localhost:8000/ws/emulator/';
@@ -32,7 +31,6 @@ export function useEmulator() {
       setStatus('connected');
       setError(null);
       ws.send(JSON.stringify({ type: 'cycles', count: 16000 }));
-      // Demander le statut
       ws.send(JSON.stringify({ type: 'get_status' }));
     };
 
@@ -83,7 +81,6 @@ export function useEmulator() {
   const reset = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'reset' }));
-      // Demander le statut après le reset
       setTimeout(() => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({ type: 'get_status' }));

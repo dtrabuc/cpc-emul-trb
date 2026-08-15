@@ -9,7 +9,7 @@ class ROM(models.Model):
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     file = models.FileField(upload_to='roms/')
-    size = models.IntegerField()  # 16KB ou 32KB
+    size = models.IntegerField()
     checksum = models.CharField(max_length=40, blank=True)
 
     def __str__(self):
@@ -28,7 +28,7 @@ class Tape(models.Model):
 class EmulatorState(models.Model):
     name = models.CharField(max_length=50, default="Autosave")
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     # CPU registers
     pc = models.IntegerField(default=0x0000)
     sp = models.IntegerField(default=0xFFFF)
@@ -46,16 +46,11 @@ class EmulatorState(models.Model):
     r = models.IntegerField(default=0x00)
     iff1 = models.BooleanField(default=False)
     iff2 = models.BooleanField(default=False)
-    
-    # RAM 64KB
+
     ram = models.BinaryField()
-    
-    # Périphériques
     crtc_regs = models.JSONField(default=dict)
     ay_regs = models.JSONField(default=dict)
     pio_regs = models.JSONField(default=dict)
-    
-    # Écran (80x25 caractères)
     screen_buffer = models.JSONField(default=list)
     cursor_x = models.IntegerField(default=0)
     cursor_y = models.IntegerField(default=0)

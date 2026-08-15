@@ -1,7 +1,3 @@
-# core/keyboard_state.py
-# Matrice de clavier du CPC 464 – 10 lignes × 8 colonnes
-# Mapping AZERTY complet
-
 class CPCKey:
     def __init__(self, line: int, bit_pos: int):
         self.line = line
@@ -73,7 +69,7 @@ class KeyboardState:
     AT = CPCKey(6, 5)
     DOLLAR = CPCKey(6, 6)
 
-    # Ligne 7 : Esc, Tab, Caps Lock, Shift
+    # Ligne 7 : Esc, Tab, Caps Lock, Shift, Ctrl
     ESC = CPCKey(7, 0)
     TAB = CPCKey(7, 1)
     CAPS_LOCK = CPCKey(7, 2)
@@ -95,7 +91,6 @@ class KeyboardState:
     ARROW_RIGHT = CPCKey(9, 3)
     COPY = CPCKey(9, 4)
 
-    # Mapping complet AZERTY → CPCKey
     AZERTY_MAP = {
         'a': A, 'b': B, 'c': C, 'd': D, 'e': E, 'f': F,
         'g': G, 'h': H, 'i': I, 'j': J, 'k': K, 'l': L,
@@ -122,7 +117,7 @@ class KeyboardState:
         'COPY': COPY,
     }
 
-    _matrix = [0xFF] * 10  # 10 lignes, chaque ligne = octet (8 bits)
+    _matrix = [0xFF] * 10
 
     @classmethod
     def press_key(cls, key: CPCKey):
@@ -138,7 +133,7 @@ class KeyboardState:
 
     @classmethod
     def press_azerty(cls, char: str) -> bool:
-        key = cls.AZERTY_MAP.get(char.lower())
+        key = cls.AZERTY_MAP.get(char)
         if key:
             cls.press_key(key)
             return True
@@ -146,7 +141,7 @@ class KeyboardState:
 
     @classmethod
     def release_azerty(cls, char: str) -> bool:
-        key = cls.AZERTY_MAP.get(char.lower())
+        key = cls.AZERTY_MAP.get(char)
         if key:
             cls.release_key(key)
             return True

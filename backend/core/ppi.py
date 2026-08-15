@@ -1,7 +1,3 @@
-# core/ppi.py
-# PPI 8255 – Gestion des ports A, B, C, contrôle, clavier, cassette, PSG
-# D'après la doc CPC : #F4XX = Port A, #F5XX = Port B, #F6XX = Port C, #F7XX = Contrôle
-
 from enum import Enum
 from .keyboard_state import KeyboardState
 
@@ -15,23 +11,16 @@ class PPI:
         self._psg = psg
         self._gate_array = gate_array
         self._keyboard = KeyboardState()
-
-        # Registres internes
         self._port_a = 0xFF
         self._port_b = 0xFF
         self._port_c = 0xFF
         self._control = 0
-
-        # Directions (0 = sortie, 1 = entrée)
         self._port_a_direction = IODirection.INPUT
         self._port_b_direction = IODirection.INPUT
         self._port_c_low_direction = IODirection.INPUT
         self._port_c_high_direction = IODirection.INPUT
-
-        # État de la cassette
         self._cas_in = False
         self._tape_motor_on = False
-        self.power_led = True
 
     def reset(self):
         self._port_a = 0xFF
@@ -49,7 +38,6 @@ class PPI:
         port_high = port & 0xF700
         port_low = port & 0x00FF
 
-        # Port A (0xF4xx)
         if port_high == 0xF400:
             if port_low == 0x00:
                 self._psg.write(value)
@@ -58,18 +46,15 @@ class PPI:
             if self._port_a_direction == IODirection.OUTPUT:
                 self._port_a = value
 
-        # Port B (0xF5xx)
         elif port_high == 0xF500:
             if self._port_b_direction == IODirection.OUTPUT:
                 self._port_b = value
 
-        # Port C (0xF6xx)
         elif port_high == 0xF600:
             if port_low == 0x00:
                 self._port_c = value
                 self._apply_port_c_output(value)
 
-        # Registre de contrôle (0xF7xx)
         elif port_high == 0xF700:
             self._control = value
             self._configure(value)
@@ -132,12 +117,3 @@ class PPI:
                     self._port_a = self._keyboard.read_row(row)
             return True
         return False
-
-def press_key(self, key: str) -> bool:
-    if self._keyboard.press_azerty(key):
-        if self._port_a_direction == IODirection.INPUT:
-            row = self._port_c & 0x0F
-            if row < 10:
-                self._port_a = self._keyboard.read_row(row)
-        return True
-    return False

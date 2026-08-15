@@ -104,7 +104,6 @@
   flex-shrink: 0;
 }
 
-/* Flèches en T inversé */
 .arrows {
   display: grid;
   grid-template-columns: repeat(3, 36px);
@@ -122,22 +121,10 @@
   min-width: 0;
 }
 
-.arrow-up {
-  grid-column: 2;
-  grid-row: 1;
-}
-.arrow-left {
-  grid-column: 1;
-  grid-row: 2;
-}
-.arrow-down {
-  grid-column: 2;
-  grid-row: 2;
-}
-.arrow-right {
-  grid-column: 3;
-  grid-row: 2;
-}
+.arrow-up { grid-column: 2; grid-row: 1; }
+.arrow-left { grid-column: 1; grid-row: 2; }
+.arrow-down { grid-column: 2; grid-row: 2; }
+.arrow-right { grid-column: 3; grid-row: 2; }
 
 .numpad {
   display: grid;
@@ -150,56 +137,17 @@
   border-radius: 6px;
 }
 
-.numpad .numpad-row {
-  display: contents;
-}
-
-.numpad .key {
-  height: 100%;
-  min-width: 0;
-  font-size: 14px;
-}
-
-.numpad .key-gray {
-  background: #888;
-  border-color: #bbb;
-  border-bottom-color: #666;
-  color: #000;
-}
-
-.numpad .key-green {
-  background: #00aa00;
-  border-color: #33dd33;
-  border-bottom-color: #007700;
-  color: #fff;
-}
+.numpad .numpad-row { display: contents; }
+.numpad .key { height: 100%; min-width: 0; font-size: 14px; }
+.numpad .key-gray { background: #888; border-color: #bbb; border-bottom-color: #666; color: #000; }
+.numpad .key-green { background: #00aa00; border-color: #33dd33; border-bottom-color: #007700; color: #fff; }
 
 @media (max-width: 768px) {
-  .key {
-    font-size: 8px;
-    min-width: 18px;
-  }
-  .kbd-row {
-    height: 24px;
-    gap: 2px;
-  }
-  .key-space {
-    min-width: 60px;
-  }
-  .key-wide {
-    min-width: 28px;
-  }
-  .keyboard-side {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .numpad {
-    grid-template-columns: repeat(3, 28px);
-    grid-template-rows: repeat(4, 24px);
-  }
-  .arrows {
-    grid-template-columns: repeat(3, 28px);
-    grid-template-rows: repeat(2, 24px);
-  }
+  .key { font-size: 8px; min-width: 18px; }
+  .kbd-row { height: 24px; gap: 2px; }
+  .key-space { min-width: 60px; }
+  .key-wide { min-width: 28px; }
+  .keyboard-side { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .numpad { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(4, 24px); }
+  .arrows { grid-template-columns: repeat(3, 28px); grid-template-rows: repeat(2, 24px); }
 }

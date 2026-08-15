@@ -1,8 +1,67 @@
-/* src/App.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: "Courier New", monospace;
+}
+
+#root {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+}
+
+.app {
+  background: #0f0f1f;
+  border: 3px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #2a2a4a;
+  padding-bottom: 12px;
+}
+
 .header-left {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header h1 {
+  color: #aaccff;
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(100, 150, 255, 0.3);
+}
+
+.subtitle {
+  color: #666688;
+  font-size: 14px;
+  letter-spacing: 1px;
 }
 
 .led-container {
@@ -60,7 +119,54 @@
   background: #ff0000;
 }
 
+.btn-settings {
+  background: none;
+  border: 1px solid #2a2a4a;
+  color: #8888bb;
+  font-size: 20px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-settings:hover {
+  background: #2a2a4a;
+  color: #ccccff;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app-footer {
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid #1a1a33;
+  color: #444466;
+  font-size: 12px;
+}
+
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .app-header h1 {
+    font-size: 18px;
+  }
+  .header-left {
+    flex-wrap: wrap;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+  }
 }

@@ -1,7 +1,3 @@
-# core/emulator.py
-# Émulateur complet : CPU, mémoire, PPI, CRTC, GateArray, PSG
-# Reset : maintient la ligne RESET haute, un appui la met à la masse
-
 from .z80_cpu import Z80CPU
 from .memory import Memory
 from .crtc import CRTC6845
@@ -26,12 +22,9 @@ class Emulator:
         self._pending_cycles = 0
         self._cycle_lock = threading.Lock()
         self._cycle_event = threading.Event()
-
-        # LED Power
         self.power_led = True
 
     def io_read(self, port):
-        # Ports PPI : 0xF400 à 0xF7FF
         if 0xF400 <= port <= 0xF7FF:
             return self.ppi.read(port)
         return 0xFF
@@ -40,11 +33,9 @@ class Emulator:
         if 0xF400 <= port <= 0xF7FF:
             self.ppi.write(port, value)
         elif 0x7F00 <= port <= 0x7F0F:
-            # Gate Array (écriture)
             self.gate_array.write(value)
 
     def reset(self):
-        """Reset complet de la machine"""
         self.memory.reset()
         self.crtc.reset()
         self.gate_array.reset()
@@ -54,7 +45,6 @@ class Emulator:
         self.running = True
         self._pending_cycles = 0
 
-        # Charger les ROMs
         try:
             self.load_roms('roms/cpc464_fr.rom', 'roms/basic_1.0.rom')
         except FileNotFoundError:
@@ -83,10 +73,9 @@ class Emulator:
             self.crtc.tick(cycles_done)
             self.gate_array.tick(cycles_done)
 
-            # --- Gestion de l'interruption 50Hz ---
             if self.gate_array.interrupt_request:
                 self.gate_array.interrupt_request = False
-                self.cpu.interrupt(0x01)  # Vecteur d'interruption (par défaut)
+                self.cpu.interrupt(0x01)
 
             if cycles_to_execute > 0:
                 self._cycle_event.set()

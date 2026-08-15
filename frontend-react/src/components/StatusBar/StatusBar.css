@@ -1,36 +1,71 @@
 .status-bar {
+  background: #0a0a1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+  padding: 8px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 10px;
-  margin-top: 6px;
-  background: #181818;
-  border: 1px solid #000;
-  border-radius: 4px;
-  color: #888888;
-  font-size: 11px;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: #8888aa;
 }
 
 .status-left {
   display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator.loading { color: #ffcc00; }
+.status-indicator.error { color: #ff4444; }
+.status-indicator.ok { color: #44ff44; }
+.status-indicator.offline { color: #ff6644; }
+
+.status-right {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.status-indicator.loading { color: #ffff00; }
-.status-indicator.error { color: #ff4444; }
-.status-indicator.ok { color: #44ff44; }
+.status-led {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666688;
+  font-size: 10px;
+}
+
+.led-small {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid #333;
+}
+
+.led-small.on {
+  background: #00ff00;
+  box-shadow: 0 0 6px #00ff00;
+}
+
+.led-small.off {
+  background: #330000;
+}
 
 .btn-reset {
-  background: #252525;
-  color: #ffffff;
-  border: 1px solid #3d3d3d;
-  border-radius: 3px;
-  padding: 2px 12px;
+  background: #2a2a4a;
+  color: #ccccff;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  padding: 4px 12px;
   cursor: pointer;
   font-family: "Courier New", monospace;
   font-size: 11px;
+  transition: all 0.15s;
 }
 
 .btn-reset:hover {
-  background: #333333;
+  background: #3a3a5a;
+  border-color: #5a5a8a;
 }

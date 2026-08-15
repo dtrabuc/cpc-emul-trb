@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import './Keyboard.css';
 
-// LAYOUT IDENTIQUE À L'IMAGE (avec touches de fonction)
 const KEY_ROWS = [
   ['Esc', '1&', '2é', '3"', "4'", '5(', '6]', '7è', '8!', '9ç', '0à', '[)', '_-', 'CLR', 'DEL'],
   ['TAB', 'A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '/^', '<*', 'ENTER'],
@@ -17,7 +16,6 @@ const NUMPAD_KEYS = [
   ['0', '.', 'COPY'],
 ];
 
-// COULEURS AUTHENTIQUES
 const KEY_COLORS = {
   'F1': 'key-blue', 'F2': 'key-blue', 'F3': 'key-blue',
   'F4': 'key-blue', 'F5': 'key-blue', 'F6': 'key-blue',
