@@ -33,6 +33,13 @@ class EmulatorConsumer(AsyncWebsocketConsumer):
         elif event_type == "reset":
             self.emulator.reset()
 
+        elif event_type == "get_status":
+            status = self.emulator.get_status()
+            await self.send(text_data=json.dumps({
+                "type": "status",
+                "data": status
+            }))
+
     async def send_screen_loop(self):
         while self.running:
             state = self.emulator.get_screen_state()
@@ -40,4 +47,4 @@ class EmulatorConsumer(AsyncWebsocketConsumer):
                 "type": "screen",
                 "data": state
             }))
-            await asyncio.sleep(0.02)
+            await asyncio.sleep(0.02)  # 50 FPS

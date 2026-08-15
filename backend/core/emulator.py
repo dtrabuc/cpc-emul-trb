@@ -1,5 +1,6 @@
 # core/emulator.py
 # Émulateur complet : CPU, mémoire, PPI, CRTC, GateArray, PSG
+# Reset : maintient la ligne RESET haute, un appui la met à la masse
 
 from .z80_cpu import Z80CPU
 from .memory import Memory
@@ -26,6 +27,9 @@ class Emulator:
         self._cycle_lock = threading.Lock()
         self._cycle_event = threading.Event()
 
+        # LED Power
+        self.power_led = True
+
     def io_read(self, port):
         # Ports PPI : 0xF400 à 0xF7FF
         if 0xF400 <= port <= 0xF7FF:
@@ -35,8 +39,12 @@ class Emulator:
     def io_write(self, port, value):
         if 0xF400 <= port <= 0xF7FF:
             self.ppi.write(port, value)
+        elif 0x7F00 <= port <= 0x7F0F:
+            # Gate Array (écriture)
+            self.gate_array.write(value)
 
     def reset(self):
+        """Reset complet de la machine"""
         self.memory.reset()
         self.crtc.reset()
         self.gate_array.reset()
@@ -75,6 +83,11 @@ class Emulator:
             self.crtc.tick(cycles_done)
             self.gate_array.tick(cycles_done)
 
+            # --- Gestion de l'interruption 50Hz ---
+            if self.gate_array.interrupt_request:
+                self.gate_array.interrupt_request = False
+                self.cpu.interrupt(0x01)  # Vecteur d'interruption (par défaut)
+
             if cycles_to_execute > 0:
                 self._cycle_event.set()
 
@@ -99,3 +112,11 @@ class Emulator:
 
     def get_screen_state(self):
         return self.gate_array.get_screen_buffer()
+
+    def get_status(self):
+        return {
+            'power_led': self.power_led,
+            'cpu_reset': not self.cpu.reset_pin,
+            'tape_motor': self.ppi._tape_motor_on,
+            'running': self.running,
+        }

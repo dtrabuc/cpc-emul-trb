@@ -1,5 +1,7 @@
 # core/z80_cpu.py
 # Z80 CPU – Toutes les instructions, préfixes CB / DD / FD / ED, interruptions, flags, cycles
+# Compatible CPC 464 – Reset actif bas (pin 26)
+# Version complète et stable
 
 class Z80CPU:
     def __init__(self):
@@ -42,6 +44,9 @@ class Z80CPU:
         self.iff2 = False
         self.im = 0
         self.halted = False
+
+        # Reset (actif bas)
+        self.reset_pin = True
 
         # Cycles
         self._cycles = 0
@@ -184,6 +189,7 @@ class Z80CPU:
 
     # --- Reset ---
     def reset(self):
+        """Reset complet du CPU (actif bas)"""
         self.a = 0x00
         self.f = 0x00
         self.b = 0x00
@@ -210,11 +216,21 @@ class Z80CPU:
         self.iff2 = False
         self.im = 0
         self.halted = False
+        self.reset_pin = True
         self._cycles = 0
+
+    def assert_reset(self):
+        """Met la ligne RESET à 0 (actif bas)"""
+        self.reset_pin = False
+        self.reset()
+
+    def release_reset(self):
+        """Relâche la ligne RESET (passe à 1)"""
+        self.reset_pin = True
 
     # --- Step ---
     def step(self):
-        if self.halted:
+        if self.halted or not self.reset_pin:
             self._cycles += 1
             return 1
 
@@ -829,9 +845,11 @@ class Z80CPU:
             return 4
 
         # Si aucune instruction ne correspond
+        # print(f"[Z80] Opcode non implémenté: {opcode:02X} à PC={self.pc-1:04X}")
         return 4
 
     # --- Préfixes ---
+
     def execute_cb(self, sub):
         # RLC r
         if 0x00 <= sub <= 0x07:

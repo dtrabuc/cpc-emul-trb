@@ -36,6 +36,9 @@ class GateArray:
         self.interrupt_request = False
         self.frame_counter = 0
 
+        # Registres du Gate Array (pour l'écriture)
+        self._regs = [0] * 16
+
     def reset(self):
         self.screen = [[' ' for _ in range(self.width)] for _ in range(self.height)]
         self.colors = [['#FFFFFF' for _ in range(self.width)] for _ in range(self.height)]
@@ -43,22 +46,35 @@ class GateArray:
         self.cursor_y = 0
         self.interrupt_request = False
         self.frame_counter = 0
+        self._regs = [0] * 16
+
+    def write(self, value: int):
+        """Écriture dans le Gate Array (port 0x7F00)"""
+        # Bit 7 = sélection registre (0 = palette, 1 = mode)
+        if value & 0x80:
+            # Mode / configuration
+            self.mode = (value >> 4) & 0x03
+        else:
+            # Palette (couleurs)
+            idx = (value >> 3) & 0x0F
+            color = value & 0x07
+            self._regs[idx] = color
 
     def tick(self, cycles: int):
         """Appelé à chaque cycle CPU"""
         self.frame_counter += cycles
 
-        # Interruption 50Hz
-        if self.frame_counter >= 19968:  # ~1/50ème de seconde
+        # Interruption 50Hz (environ 19968 cycles)
+        if self.frame_counter >= 19968:
             self.frame_counter = 0
             self.interrupt_request = True
             self._render_frame()
 
     def _render_frame(self):
         """Lit la RAM vidéo et construit l'écran"""
-        # RAM vidéo : 0xC000 à 0xFFFF
-        # Les caractères sont stockés à 0xC000 + 0x800 (2KB)
-        char_ram_start = 0xC000 + 0x800
+        # La RAM vidéo est toujours en &C000-&FFFF
+        # Le texte VDU écrit à partir de &C000
+        char_ram_start = 0xC000
 
         for row in range(self.height):
             for col in range(self.width):

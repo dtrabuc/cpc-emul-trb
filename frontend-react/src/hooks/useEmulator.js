@@ -15,6 +15,8 @@ export function useEmulator() {
   });
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
+  const [powerLed, setPowerLed] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
   const wsRef = useRef(null);
   const reconnectTimeout = useRef(null);
 
@@ -30,6 +32,8 @@ export function useEmulator() {
       setStatus('connected');
       setError(null);
       ws.send(JSON.stringify({ type: 'cycles', count: 16000 }));
+      // Demander le statut
+      ws.send(JSON.stringify({ type: 'get_status' }));
     };
 
     ws.onmessage = (event) => {
@@ -47,6 +51,9 @@ export function useEmulator() {
             mode: d.mode || 1,
           });
           ws.send(JSON.stringify({ type: 'cycles', count: 16000 }));
+        } else if (data.type === 'status') {
+          setPowerLed(data.data.power_led);
+          setIsResetting(data.data.cpu_reset);
         }
       } catch (e) {
         console.error('[WS] Erreur parsing:', e);
@@ -76,6 +83,12 @@ export function useEmulator() {
   const reset = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'reset' }));
+      // Demander le statut après le reset
+      setTimeout(() => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'get_status' }));
+        }
+      }, 100);
     }
   }, []);
 
@@ -91,6 +104,8 @@ export function useEmulator() {
     screen,
     status,
     error,
+    powerLed,
+    isResetting,
     sendKey,
     reset,
     isConnected: status === 'connected',

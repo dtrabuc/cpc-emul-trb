@@ -9,7 +9,7 @@ import SettingsModal from './components/Settings/SettingsModal';
 import './App.css';
 
 function App() {
-  const { screen, loading, error, sendKey, reset, isConnected } = useEmulator();
+  const { screen, loading, error, powerLed, isResetting, sendKey, reset, isConnected } = useEmulator();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLoadROM = (firmwareFile, basicFile) => {
@@ -35,8 +35,18 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🖥️ CPC 464 Emulator</h1>
+        <div className="header-left">
+          <h1>🖥️ CPC 464 Emulator</h1>
+          <div className="led-container">
+            <span className={`led ${powerLed ? 'on' : 'off'}`}></span>
+            <span className="led-label">POWER</span>
+          </div>
+          {isResetting && <span className="reset-badge">⏳ RESET</span>}
+        </div>
         <div className="header-actions">
+          <button className="btn-reset-hard" onClick={reset} title="Reset machine">
+            🔄 Reset
+          </button>
           <button className="btn-settings" onClick={() => setIsSettingsOpen(true)}>
             ⚙️
           </button>
@@ -62,6 +72,7 @@ function App() {
           error={error}
           onReset={reset}
           isConnected={isConnected}
+          powerLed={powerLed}
         />
       </main>
 
