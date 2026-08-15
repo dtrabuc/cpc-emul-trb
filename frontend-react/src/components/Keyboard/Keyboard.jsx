@@ -36,34 +36,65 @@ const SPECIAL_LABELS = {
 const WIDE_KEYS = ['Esc', 'TAB', 'CAPS LOCK', 'SHIFT', 'CTRL', 'ENTER', 'CLR', 'DEL'];
 
 function Keyboard({ onKeyPress }) {
-  const handleClick = (label) => {
+  const handleKeyDown = (label) => {
     if (onKeyPress) {
-      console.log('[FRONT] Touche cliquée:', label);
-      onKeyPress(label);
+      console.log('[FRONT] Touche appuyée:', label);
+      onKeyPress(label, true);
     }
+  };
+
+  const handleKeyUp = (label) => {
+    if (onKeyPress) {
+      console.log('[FRONT] Touche relâchée:', label);
+      onKeyPress(label, false);
+    }
+  };
+
+  const handleClick = (label) => {
+    handleKeyDown(label);
+    setTimeout(() => handleKeyUp(label), 100);
   };
 
   useEffect(() => {
     const handlePhysical = (e) => {
-      const key = e.key;
-      if ([' ', 'Tab', 'Enter', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-        e.preventDefault();
+      if (e.type === 'keydown') {
+        const key = e.key;
+        if ([' ', 'Tab', 'Enter', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+          e.preventDefault();
+        }
+        let mapped = key;
+        if (key === 'Enter') mapped = 'ENTER';
+        if (key === 'Backspace') mapped = 'DEL';
+        if (key === 'Escape') mapped = 'Esc';
+        if (key === 'Tab') mapped = 'TAB';
+        if (key === ' ') mapped = 'SPACE';
+        if (key === 'Control') mapped = 'CTRL';
+        if (key === 'Shift') mapped = 'SHIFT';
+        if (key.startsWith('Arrow')) mapped = key;
+        console.log('[FRONT] Touche physique down:', key, '→', mapped);
+        handleKeyDown(mapped);
+      } else if (e.type === 'keyup') {
+        const key = e.key;
+        let mapped = key;
+        if (key === 'Enter') mapped = 'ENTER';
+        if (key === 'Backspace') mapped = 'DEL';
+        if (key === 'Escape') mapped = 'Esc';
+        if (key === 'Tab') mapped = 'TAB';
+        if (key === ' ') mapped = 'SPACE';
+        if (key === 'Control') mapped = 'CTRL';
+        if (key === 'Shift') mapped = 'SHIFT';
+        if (key.startsWith('Arrow')) mapped = key;
+        console.log('[FRONT] Touche physique up:', key, '→', mapped);
+        handleKeyUp(mapped);
       }
-      let mapped = key;
-      if (key === 'Enter') mapped = 'ENTER';
-      if (key === 'Backspace') mapped = 'DEL';
-      if (key === 'Escape') mapped = 'Esc';
-      if (key === 'Tab') mapped = 'TAB';
-      if (key === ' ') mapped = 'SPACE';
-      if (key === 'Control') mapped = 'CTRL';
-      if (key === 'Shift') mapped = 'SHIFT';
-      if (key.startsWith('Arrow')) mapped = key;
-      console.log('[FRONT] Touche physique:', key, '→', mapped);
-      if (onKeyPress) onKeyPress(mapped);
     };
     window.addEventListener('keydown', handlePhysical);
-    return () => window.removeEventListener('keydown', handlePhysical);
-  }, [onKeyPress]);
+    window.addEventListener('keyup', handlePhysical);
+    return () => {
+      window.removeEventListener('keydown', handlePhysical);
+      window.removeEventListener('keyup', handlePhysical);
+    };
+  }, []);
 
   return (
     <div className="keyboard-wrapper">
